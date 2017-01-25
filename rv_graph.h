@@ -167,7 +167,7 @@ public:
 	RVVertexInfo(void);
 	RVVertexInfo(const RVVertexInfo& other);
 
-	virtual ~RVVertexInfo();
+	virtual ~RVVertexInfo() THROWS(TypeMismatchException);
 
 	virtual RVVertexInfo* clone(void) const = 0;
 

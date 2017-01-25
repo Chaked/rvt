@@ -1,6 +1,7 @@
 
 #include  "rv_gotoEliminator.h"
-#include <basetsd.h>
+#include <limits.h>
+// #include <basetsd.h>
 
 using namespace std;
 
@@ -909,7 +910,7 @@ void GotoEliminator::putNewGotoStatmentAfterMatchingCaseLabel(IfStemnt* newGotoS
 {
 	Statement* fatherCaseStatement = switchStemnt->getFatherCaseStatementOf(matchingLabel);
 	if (fatherCaseStatement == NULL){
-		throw new std::exception("Unable to find label in switch statement - something is really wrong");
+		throw new std::runtime_error("Unable to find label in switch statement - something is really wrong");
 	}
 
 	if (fatherCaseStatement->type == ST_Block){

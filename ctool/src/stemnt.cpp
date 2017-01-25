@@ -903,7 +903,7 @@ SwitchStemnt::findStemnt( fnStemntCallback cb )
 Statement* SwitchStemnt::getFatherCaseStatementOf(Statement* statementToFind){
 	Statement* currentCaseStatement = ((Block*) block)->head;
 	if (!currentCaseStatement->isStatementContainCaseLabel()){
-		throw new std::exception("First statement in a switch block should have a case label on it");
+		throw new std::runtime_error("First statement in a switch block should have a case label on it");
 	}
 
 	for (Statement* statement = currentCaseStatement ; statement ; statement = statement->next){

@@ -911,7 +911,7 @@ Symbol* RVCollect::get_assigned_symbol(Expression* s0p, bool* pderef, bool* parr
     case ET_IndexExpr:{     // x[y]...[]
       RETYPE(IndexExpr);
       if( !collect_array_ref(s0p->array) )
-	return false;
+	return nullptr;
       if( parray )
 	*parray = true;
       if( pderef )

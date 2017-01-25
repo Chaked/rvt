@@ -1477,7 +1477,7 @@ public:
 		m_v(v) {}
 	virtual ~RVForwardIterator() {}
 
-	virtual bool hasMore(void) const { return !isEnd(m_v.end()); }
+	virtual bool hasMore(void) const { return !this->isEnd(m_v.end()); }
 
 private:
 	const V& m_v;
@@ -1492,7 +1492,7 @@ public:
 		m_v(v) {}
 	virtual ~RVBackwardIterator() {}
 
-	virtual bool hasMore(void) const { return !isEnd(m_v.rend()); }
+	virtual bool hasMore(void) const { return !this->isEnd(m_v.rend()); }
 
 private:
 	const V& m_v;
@@ -1874,7 +1874,7 @@ public:
 			if(! st->isFuncDef() )
 				continue;
 			if (!processFuncDef(static_cast<FunctionDef*>(st)))
-				return false;
+				return nullptr;
 		}
 
 		bool res = continueBuilding(m_block);

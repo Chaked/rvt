@@ -6,3 +6,4 @@ frama.c
 frama_out.txt
 frama_out_parsed.txt
 *.gv
+*.o

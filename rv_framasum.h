@@ -7,7 +7,8 @@
 #include <sstream>
 #include <limits>
 #include <cmath>
-#include <basetsd.h>
+#include <limits.h>
+/* #include <basetsd.h> */
 #include "rv_temps.h"
 #include "rv_commands.h"
 

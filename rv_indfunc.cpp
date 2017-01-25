@@ -119,7 +119,7 @@ Symbol* RVFuncClass::get_enum_sym(std::string& func_name)
 {
   BaseType* enum_type = get_enum_tp();
   if( !enum_type || !enum_type->enDefn )
-    return false;
+    return nullptr;
 
   std::string fi_name = func_ind_name(func_name);
 
@@ -166,7 +166,7 @@ Decl* RVFuncClass::get_hub_decl(Project* pt)
 
   Type* enum_type = get_enum_tp();
   if( !enum_type )
-    return false;
+    return nullptr;
 
   BaseType* new_type = (BaseType*)enum_type->dup();
   new_type->enDefn = NULL;  // keep only the tag name - not all enum def.

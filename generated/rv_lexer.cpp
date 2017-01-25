@@ -12525,6 +12525,8 @@ extern "C" int yywrap(void);
 
 #include <rv_parse.h>
 
+#include <unistd.h>
+
 /* Use prototypes in function declarations. */
 #define YY_USE_PROTOS
 

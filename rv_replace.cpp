@@ -717,11 +717,11 @@ Expression* RVRenameTree::gen_check_point_code(ExprVector& vals, std::string& ty
   ret->args.push_back(new UnaryExpr(UO_AddrOf, channel, *pl));
 
   if( try_replace(&cond) && !process(cond) )
-	ret = false;
+	ret = nullptr;
   ret->args.push_back(cond);
 
   if( try_replace(&val) && !process(val) )
-	ret = false;
+	ret = nullptr;
   ret->args.push_back(val);
 
   return ret;

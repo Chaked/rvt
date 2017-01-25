@@ -636,7 +636,7 @@ RVVertexInfo::RVVertexInfo(void)
 RVVertexInfo::RVVertexInfo(const RVVertexInfo& other)
   : m_ptr(other.m_ptr), m_typeName(other.m_typeName), m_cloned(other.m_cloned) {}
 
-RVVertexInfo::~RVVertexInfo() {
+RVVertexInfo::~RVVertexInfo() THROWS(TypeMismatchException) {
 	m_ptr = NULL;
 }
 

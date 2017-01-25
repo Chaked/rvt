@@ -419,7 +419,7 @@ Statement* RVLoop::create_call(Expression* init, Symbol* retsym, bool loop_has_r
 
 	FunctionCall* call = new FunctionCall(new Variable(name->dup0(), l), l);
 
-	add_call_args(call, false, l);
+	add_call_args(call, nullptr, l);
 
 	/* add retvar arg if needed: */
 	if( retsym ) {
@@ -434,7 +434,7 @@ Statement* RVLoop::create_call(Expression* init, Symbol* retsym, bool loop_has_r
 		blk->add(new ExpressionStemnt(init, l));
 
 	if (loop_has_return) {
-		Block* sw_blk = gen_loop_call_switch_body(false, l);
+		Block* sw_blk = gen_loop_call_switch_body(nullptr, l);
 
 		/* add "case LTC_RETURN: return <value-or-LTC_RETURN>;" if needed */
 		Label* ltc_return_lab = new Label(new UIntConstant(LTC_RETURN, false, l));
