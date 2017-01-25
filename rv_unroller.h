@@ -18,7 +18,7 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-#include "decl.h"
+#include "ctool/decl.h"
 
 using std::string;
 using std::map;
