@@ -1,13 +1,13 @@
 #ifndef RV_UNROL_H
 #define RV_UNROL_H
 
-#define UNROLLING_VARIABLE_DEFINITION_TITLE "\/\/ Global Unrolling Variable Definition\n"
-#define UNROLLING_VARIABLE_DEFINITION_END "\/\/ End of Unrolling Variable Definition\n"
-#define UNROLLING_HELPER_DEFINITION_TITLE "\/\/ Unrolling helper function prototypes\n"
-#define UNROLLING_HELPER_DEFINITION_END "\/\/ End of unrolling helper function prototypes\n"
+#define UNROLLING_VARIABLE_DEFINITION_TITLE "// Global Unrolling Variable Definition\n"
+#define UNROLLING_VARIABLE_DEFINITION_END "// End of Unrolling Variable Definition\n"
+#define UNROLLING_HELPER_DEFINITION_TITLE "// Unrolling helper function prototypes\n"
+#define UNROLLING_HELPER_DEFINITION_END "// End of unrolling helper function prototypes\n"
 #define UNROLLING_HELPER_FUNCTION_START "rv_unroll_helper_"
-#define UNROLLING_GLOBAL_VARIABLES_START "\/\/ Global Variables for Unrolling\n"
-#define UNROLLING_GLOBAL_VARIABLES_END "\/\/ End of Global Variables for Unrolling\n"
+#define UNROLLING_GLOBAL_VARIABLES_START "// Global Variables for Unrolling\n"
+#define UNROLLING_GLOBAL_VARIABLES_END "// End of Global Variables for Unrolling\n"
 #define GLOBAL_BASECASE_FALG_NAME "rv_unroll_helper_basecase_flag"
 #define UF_PREFIX "rvs"
 #define CHECK_FUNC_PREFIX "chk"
