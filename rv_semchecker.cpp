@@ -268,7 +268,7 @@ bool RVSemChecker::generate_output( const std::string& fname, const std::string&
  /*  RVSummarizer summarizer_side0(fname, side0_fpath, &rv_commands, 0);
   RVSummarizer summarizer_side1(fname, side1_fpath, &rv_commands, 1);
 */
-  auto_ptr<RVUFGen> ufgen( mutual_term_check? new RVReUfGen(m_temps, sum0, sum1, seperate_basecase_proof) //DIMA_REACH_EQUIV
+  unique_ptr<RVUFGen> ufgen( mutual_term_check? new RVReUfGen(m_temps, sum0, sum1, seperate_basecase_proof) //DIMA_REACH_EQUIV
 	  : new RVUFGen(m_temps, sum0, sum1, seperate_basecase_proof));
 
   ufgen->set_unitrv(unitrv);
