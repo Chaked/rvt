@@ -83,7 +83,7 @@ Project *gProject = NULL;
 
 bool Project::gDebug = false;
 // Fill in StdPath[1] with path obtained from running cpp on <stddef.h>
-char  *StdPath[] = { "/usr/include/", NULL, NULL };
+const char  *StdPath[] = { "/usr/include/", NULL, NULL };
 
 // o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o
 void

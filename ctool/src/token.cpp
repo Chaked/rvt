@@ -39,7 +39,7 @@
 
 /*  ###############################################################  */
 
-char *toksym(int tok, int white)
+const char *toksym(int tok, int white)
 {
     switch (tok)
     {

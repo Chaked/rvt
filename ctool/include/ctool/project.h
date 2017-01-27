@@ -57,7 +57,7 @@ extern void   InitStdPath(
                 const char* cpp_cmd=(const char *) NULL
     );
 
-extern char  *StdPath[];
+extern const char  *StdPath[];
 
 // o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o+o
 

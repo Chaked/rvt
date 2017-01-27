@@ -15708,7 +15708,7 @@ void print_caret(const std::string &s, int pos)
  
 /***********************************************************************/
 
-void yywarn(char *s)
+void yywarn(const char *s)
 {
     *gProject->Parse_TOS->yyerrstream
          << gProject->Parse_TOS->filename << ":" << gProject->Parse_TOS->yylineno
@@ -15718,7 +15718,7 @@ void yywarn(char *s)
 
 /***********************************************************************/
 
-int yyerr(char *s, const std::string & str)
+int yyerr(const char *s, const std::string & str)
 {
     *gProject->Parse_TOS->yyerrstream
       << gProject->Parse_TOS->filename << ":" << gProject->Parse_TOS->yylineno
@@ -15736,7 +15736,7 @@ int yyerr(char *s, const std::string & str)
 
 /***********************************************************************/
 
-int yyerr(char *s)
+int yyerr(const char *s)
 {
     *gProject->Parse_TOS->yyerrstream
       << gProject->Parse_TOS->filename << ":" << gProject->Parse_TOS->yylineno
@@ -15754,7 +15754,7 @@ int yyerr(char *s)
 
 /***********************************************************************/
 
-int yyerror(char *s)
+int yyerror(const char *s)
 {
     int aborting = 0;
     *gProject->Parse_TOS->yyerrstream
