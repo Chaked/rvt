@@ -1,9 +1,20 @@
 cmake_minimum_required (VERSION 3.3)
 project (rvt)
 
+find_package(BISON REQUIRED)
+find_package(FLEX REQUIRED)
+
 include_directories(
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/ctool/include)
+
+BISON_TARGET(rv_gram
+  ${PROJECT_SOURCE_DIR}/rv_gram.y
+  ${CMAKE_CURRENT_BINARY_DIR}/rv_gram.cpp
+  COMPILE_FLAGS "--defines=${CMAKE_CURRENT_BINARY_DIR}/rv_gram.h")
+FLEX_TARGET(rv_lexer ${PROJECT_SOURCE_DIR}/rv_lexer.l  ${CMAKE_CURRENT_BINARY_DIR}/rv_lexer.cpp)
+ADD_FLEX_BISON_DEPENDENCY(rv_lexer rv_gram)
+
 add_executable(rvt
   rv_arrays.cpp
   rv_array_assume.cpp
@@ -52,5 +63,5 @@ add_executable(rvt
   ctool/src/token.cpp
   RVArithConverter.cpp
   RVTextualUnroller.cpp
-  generated/rv_gram.cpp
-  generated/rv_lexer.cpp)
+  ${FLEX_rv_lexer_OUTPUTS}
+  ${BISON_rv_gram_OUTPUTS})
