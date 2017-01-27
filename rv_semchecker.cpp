@@ -353,7 +353,7 @@ bool RVSemChecker::generate_output( const std::string& fname, const std::string&
 	  if(DBG) rv_errstrm << DBG_INFO << "P28\n";
 
 	  m_temps.close(discharger);
-	  cout << "the value of mutual term check: " + mutual_term_check << "\n";
+	  cout << "the value of mutual term check: " << mutual_term_check << "\n";
 	  if (mutual_term_check)
 		ufgen->determineLoopBackDepths(ofname, *this, fname);
 	  
