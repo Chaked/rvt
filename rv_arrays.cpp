@@ -254,8 +254,8 @@ RVClearEqualTo::RVClearEqualTo()
 
 bool RVClearEqualTo::clear_all(Project* _tree, int _side)
 {
-  CHK_NULL1(_tree && (_side == 0 || _side == 1),
-			"_tree is NULL or bad _side in RVClearEqualTo::clear_all()");
+  CHK_NULL1(_tree, "_tree is NULL in RVClearEqualTo::clear_all()");
+  assert(_side == 0 || _side == 1);
   bool ret = true;
 
   parsetree = _tree;
@@ -352,8 +352,8 @@ void RVArrays::init(FunctionDef* _body, int _side, const char *_where)
 
 bool RVArrays::add_type(Type* tp)
 {
-	CHK_NULL1(tp && (current_side==0 || current_side==1),
-			"tp==NULL or bad side in RVArrays::add_type()"); 
+	CHK_NULL1(tp, "tp==NULL in RVArrays::add_type()");
+    assert(current_side==0 || current_side==1);
 
 	bool found = false;
 	TypeVector::iterator it;
@@ -381,8 +381,8 @@ bool RVArrays::add_type(Type* tp)
 Type* RVArrays::find_array_type(Type* tp, int side)
 // returns NULL when no similar type was found.
 {
-	CHK_NULL1(tp && (side==0 || side==1),
-			"tp==NULL or bad side in RVArrays::find_array_type()"); 
+	CHK_NULL1(tp, "tp==NULL in RVArrays::find_array_type()");
+    assert(side==0 || side==1);
 
 	TypeVector::iterator it;
 	FORVEC(it, array_item_types[side])
@@ -394,8 +394,8 @@ Type* RVArrays::find_array_type(Type* tp, int side)
 
 bool RVArrays::add_ref(RVArrayRef* ref)
 {
-	CHK_NULL1(ref && (current_side==0 || current_side==1),
-			"decl is NULL or bad side in RVArrays::add_ref()"); 
+	CHK_NULL1(ref, "decl is NULL in RVArrays::add_ref()");
+    assert(current_side==0 || current_side==1);
 
 	Type *tp, *tp2;
 
@@ -432,8 +432,8 @@ bool RVArrays::add_ref(RVArrayRef* ref)
 
 RVArrayRef* RVArrays::get_same_ref(const RVArrayRef* ref)
 {
-	CHK_NULL1(ref && (current_side==0 || current_side==1),
-			"ref is NULL or bad side in RVArrays::has_ref()"); 
+	CHK_NULL1(ref, "ref is NULL in RVArrays::has_ref()");
+    assert(current_side==0 || current_side==1);
 
 	ARVector::const_iterator it;
 	FORVEC(it, array_refs[current_side])
@@ -1031,8 +1031,8 @@ bool RVArrays::replace_occurrences_of_type(Project* parsetree, const Type* repla
 
 bool RVArrays::replace_array_decls_and_types(Project* parsetree, int side)
 {
-	CHK_NULL1(parsetree && (side==0 || side==1),
-			"parsetree is NULL or bad side in RVArrays::replace_array_decls_and_types()"); 
+	CHK_NULL1(parsetree, "parsetree is NULL in RVArrays::replace_array_decls_and_types()");
+    assert(side==0 || side==1);
 
 	bool ret = true;
 	current_side = side;

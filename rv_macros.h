@@ -38,7 +38,7 @@
   {if(!(WHAT)){rv_errstrm<<"Error: "<<(WHERE)<<" got NULL value.\n"; return RVBoolStatus(false, WHERE, DBG);}}
 
 #define CHK_NULL1(WHAT,WHERE) \
-  {if(!(WHAT)){rv_errstrm<<"Error: "<<(WHERE)<<" got NULL value.\n"; return NULL;}}
+  {if(WHAT == nullptr){rv_errstrm<<"Error: "<<(WHERE)<<" got NULL value.\n"; return NULL;}}
 
 /* chenge the type of the pointers that are used for the sides to T: */
 #define RETYPE(T)  T *tmp_it=((T*)s0p); T *s0p=tmp_it; 

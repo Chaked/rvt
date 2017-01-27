@@ -399,7 +399,8 @@ if(DBG) rv_errstrm << DBG_INFO << "enter start_generation()\n";
 
 bool RVSemChecker::print_global_decls( RVRenameTree* ren0,  RVRenameTree* ren1)
 {
-	CHK_NULL1( (ren0 && ren1), "RVMain::print_global_decls()");
+	CHK_NULL1(ren0, "RVMain::print_global_decls()");
+	CHK_NULL1(ren1, "RVMain::print_global_decls()");
 
 	bool ret = true;
 	

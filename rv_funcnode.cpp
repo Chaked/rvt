@@ -507,8 +507,10 @@ void RVFuncNode::count_args(unsigned num)
 unsigned RVFuncNode::get_label_index(const FunctionDef* this_func, const Symbol* label)
   /* returns 0 on failure */
 {
-  CHK_NULL1(this_func && label,
-        "this_func or label in RVFuncNode::get_label_index()");
+  CHK_NULL1(this_func,
+        "this_func in RVFuncNode::get_label_index()");
+  CHK_NULL1(label,
+        "label in RVFuncNode::get_label_index()");
 
   unsigned ind = 1;  /* Note: label indexes atrtr from 1 ! */
   SymbolVector::const_iterator i;

@@ -412,7 +412,8 @@ bool RVIndirectFuncs::add_hub_decls()
 
 bool RVIndirectFuncs::process_all(Project* _parsetree, int _side)
 {
-  CHK_NULL1( _parsetree && (_side >= 0), "RVIndirectFuncs::process_all()")
+  CHK_NULL1( _parsetree, "RVIndirectFuncs::process_all()");
+  assert(_side >= 0);
   set_params(_parsetree, _side);
   rv_ellipsis_fix.set_params(_parsetree, _side);
 
