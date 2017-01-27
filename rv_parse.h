@@ -136,8 +136,8 @@ class RVGlobLists : public RVParse {
 	void outlineDefaultFuncName(std::string& func_name, BinaryOp _op);
 	void outlineBaseTypesFuncName(std::string& func_name,
 			                      BinaryOp _op,
-			                      std::auto_ptr<Expression> &lExpr,
-			                      std::auto_ptr<Expression> &rExpr,
+			                      std::unique_ptr<Expression> &lExpr,
+			                      std::unique_ptr<Expression> &rExpr,
                                   Type *lbt,
                                   Type *rbt);
 	void defineTypeSpecificOutlineFunc(const std::string& funcName,

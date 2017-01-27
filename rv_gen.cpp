@@ -380,7 +380,7 @@ bool RVGen::gen_simple_component_op(ItemOp op, RVGenCtx& ctx, std::string& by, i
 	// go deeper and perform it through gen_item_or_struct_op().
 	// Note: pointer actions are always done for the current item.
 	if( pointer2pointer && !always_single ) {
-		auto_ptr<RVGenCtx> son_ctx(ctx.create_derefed_ctx());
+		unique_ptr<RVGenCtx> son_ctx(ctx.create_derefed_ctx());
 		return gen_item_or_struct_op(op, *son_ctx, ACT_BY, depth-1);
 	}
 
@@ -402,7 +402,7 @@ bool RVGen::gen_struct_op(ItemOp op, RVGenCtx& ctx, std::string& by, int depth /
 	unsigned son_depth, size, max_size = 0;
 	Decl* comp = NULL;
 	bool ret = true;
-	auto_ptr<RVGenCtx> max_ctx;
+	unique_ptr<RVGenCtx> max_ctx;
 	bool is_union = ctx.is_union();
 
 	str = get_struct_def(ctx.get_real_type(0), m_where);
@@ -414,7 +414,7 @@ bool RVGen::gen_struct_op(ItemOp op, RVGenCtx& ctx, std::string& by, int depth /
 			if( !comp->name )
 				continue;
 
-			auto_ptr<RVGenCtx> pSonCtx(ctx.dup_for_struct_item(i, j));
+			unique_ptr<RVGenCtx> pSonCtx(ctx.dup_for_struct_item(i, j));
 			if( !is_union ) {
 				son_depth = pSonCtx->var_is_pointer() ? depth-1: depth;
 				ret = gen_item_or_struct_op(op, *pSonCtx, ACT_BY, son_depth) && ret;
@@ -423,7 +423,7 @@ bool RVGen::gen_struct_op(ItemOp op, RVGenCtx& ctx, std::string& by, int depth /
 				/* for union find the biggest item and set only its value: */
 				size = pSonCtx->get_size();
 				if( size > max_size ) {
-					max_ctx = pSonCtx;
+					max_ctx = std::move(pSonCtx);
 					max_size = size;
 				}
 			}

@@ -173,7 +173,7 @@ RVGenCtx* RVGenCtx::cloneCtx(void) const {
     return new RVGenCtx(where, is_input(), m_unitrv, m_pRenamer, m_side);
 }
 
-auto_ptr<RVGenCtx> RVGenCtx::dup_for_struct_item(unsigned comp_num, unsigned item_num) {
+unique_ptr<RVGenCtx> RVGenCtx::dup_for_struct_item(unsigned comp_num, unsigned item_num) {
 	Decl*      comp;
 	std::string name;
 
@@ -182,7 +182,7 @@ auto_ptr<RVGenCtx> RVGenCtx::dup_for_struct_item(unsigned comp_num, unsigned ite
 			<< comp_num <<","<< item_num << "> in non-struct type: ";
 		get_real_type(0)->printType(rv_errstrm, NULL, true, 0);
 		fatal_error("\nNon struct item",false);
-		return auto_ptr<RVGenCtx>();
+		return unique_ptr<RVGenCtx>();
 	}
 
 	RVGenCtx* clone = cloneCtx();
@@ -199,16 +199,16 @@ auto_ptr<RVGenCtx> RVGenCtx::dup_for_struct_item(unsigned comp_num, unsigned ite
 		clone->add_lane(comp->name, comp->form, name, get_side(i), get_prefix(i));
 	}
 
-	return auto_ptr<RVGenCtx>(clone);
+	return unique_ptr<RVGenCtx>(clone);
 }
 
-auto_ptr<RVGenCtx> RVGenCtx::create_derefed_ctx(void) {
+unique_ptr<RVGenCtx> RVGenCtx::create_derefed_ctx(void) {
 	if( is_aggregate() || !var_is_pointer() ) {
 		rv_errstrm << "Internal: RVGenCtx::create_derefed_ctx(): attempt to deref a struct/union "
 			" or non-pointer type: ";
 		get_real_type(0)->printType(rv_errstrm, NULL, true, 0);
 		fatal_error("\nDeref in struct or non-pointer item",false);
-		return auto_ptr<RVGenCtx>();
+		return unique_ptr<RVGenCtx>();
 	}
 
 	RVGenCtx* res = cloneCtx();
@@ -220,7 +220,7 @@ auto_ptr<RVGenCtx> RVGenCtx::create_derefed_ctx(void) {
 	for(unsigned i = 0; i < width; i++)
 		res->add_lane((Symbol *) NULL, get_real_type(i), get_name(i), get_side(i), Deref_pref + get_prefix(i));
 
-	return auto_ptr<RVGenCtx>(res);
+	return unique_ptr<RVGenCtx>(res);
 }
 
 ///<summary>

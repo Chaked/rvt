@@ -436,8 +436,8 @@ void RVGlobLists::outlineDefaultFuncName(std::string& func_name, BinaryOp _op) {
 ///</summary>
 void RVGlobLists::outlineBaseTypesFuncName(string& func_name,
 		                                   BinaryOp _op,
-		                                   auto_ptr<Expression> &lExpr,
-		                                   auto_ptr<Expression> &rExpr,
+		                                   unique_ptr<Expression> &lExpr,
+		                                   unique_ptr<Expression> &rExpr,
 		                                   Type *lbt_,
 		                                   Type *rbt_)
 {
@@ -528,7 +528,7 @@ Expression* RVGlobLists::outline(BinaryOp _op, Expression *lExprOrig, Expression
 	default: assert(0); // supposed to get to this function only under 'mult_op' ('*', '/', '%')
 	}
 
-	auto_ptr<Expression> lExpr(lExprOrig->dup()), rExpr(rExprOrig->dup());
+	unique_ptr<Expression> lExpr(lExprOrig->dup()), rExpr(rExprOrig->dup());
 	bool canTryTypeSpecific = true;
 
 	if (lExpr->type == NULL || rExpr->type == NULL) {

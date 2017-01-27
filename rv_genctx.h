@@ -119,9 +119,9 @@ class RVGenCtx : public RVCtool
 
 	unsigned var_lane() const;
 
-	std::auto_ptr<RVGenCtx> dup_for_struct_item(unsigned comp_num, unsigned item_num);
+	std::unique_ptr<RVGenCtx> dup_for_struct_item(unsigned comp_num, unsigned item_num);
 	// for pointer-to-pointer items:
-	std::auto_ptr<RVGenCtx> create_derefed_ctx(void);
+	std::unique_ptr<RVGenCtx> create_derefed_ctx(void);
 
 	bool localize_lanes();
 
