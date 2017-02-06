@@ -12,8 +12,7 @@ include_directories(
 
 BISON_TARGET(rv_gram
   ${PROJECT_SOURCE_DIR}/rv_gram.y
-  ${CMAKE_CURRENT_BINARY_DIR}/rv_gram.cpp
-  COMPILE_FLAGS "--defines=${CMAKE_CURRENT_BINARY_DIR}/rv_gram.h")
+  ${CMAKE_CURRENT_BINARY_DIR}/rv_gram.cpp)
 FLEX_TARGET(rv_lexer ${PROJECT_SOURCE_DIR}/rv_lexer.l  ${CMAKE_CURRENT_BINARY_DIR}/rv_lexer.cpp)
 ADD_FLEX_BISON_DEPENDENCY(rv_lexer rv_gram)
 

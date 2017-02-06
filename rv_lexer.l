@@ -33,7 +33,7 @@ extern "C" int yywrap(void);
 #include <cerrno>
 
 #include <ctool/config.h>
-#include "rv_gram.h"
+#include "rv_gram.hpp"
 #include <ctool/lexer.h>
 #include <ctool/token.h>
 #include <ctool/symbol.h>
