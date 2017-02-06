@@ -35,6 +35,22 @@ static const char *EOL = "\n";
 static const bool HTML = false;
 static const char *RV_DOTTY_FILE = "rv_out.gv";
 
+static bool checkReve(int functionIndex, std::string filePath1, std::string filePath2) {
+	RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
+    assert(pfp != nullptr);
+    std::string functionName = pfp->name;
+
+    std::array<char, 128> buffer;
+    std::string llreveOutput;
+    // TODO pass the correct function and assume equivalents here
+    std::string command = "llreve.py -z3 -fun " + functionName + " " + filePath1 + " " + filePath2;
+    std::unique_ptr<FILE, std::function<int(FILE*)>> pipe(popen(command.c_str(), "r"), pclose);
+    while (!feof(pipe.get())) {
+        if (fgets(buffer.data(), 128, pipe.get()) != NULL)
+            llreveOutput += buffer.data();
+    }
+    return llreveOutput == "EQUAL\n";
+}
 
 class Console {
 public:
@@ -733,7 +749,7 @@ public:
 			{
 			case 0:
 				Console::WriteLine("DAG 1: S", j, " cannot be mapped and cannot be inlined. Ancestors are doomed.");
-				dag1.mark_ancestors_as_doomed(j, true, false);
+				dag1.set_doomed(j, true);
 				changed = true;
 				break;
 			case 1:
@@ -766,7 +782,7 @@ public:
 			{
 			case 0:
 				Console::WriteLine("cannot be mapped and cannot be inlined. Ancestors are doomed.");
-				dag0.mark_ancestors_as_doomed(j, true, true);
+				dag0.set_doomed(j, true);
 				changed = true;
 				break;
 			case 1:
@@ -1091,6 +1107,14 @@ public:
 		dag0.cg.set_sem_checked(f0);
 		dag1.cg.set_sem_checked(mapf0[f0]);
 		Console::WriteLine("failed.");
+
+        Console::Write("Reve test: ");
+        bool llreveResult = checkReve(f0, side0_fpath, side1_fpath);
+        Console::WriteLine(llreveResult ? "equivalent" : "unknown");
+        if (llreveResult) {
+            return true;
+        }
+
 		Console::WriteLine("Semantic equivalence check:");
 		Console::WriteLine("-*-*-*-*-*-*-*  In  -*-*-*-*-*-*-*-*-*-*-");
 		RVCommands::ResCode res = semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
@@ -1569,8 +1593,9 @@ void RVT_Decompose::Decompose_main( unsigned int CG0_SIZE, unsigned int CG1_SIZE
 	dag0.todotty("dag0");  dag1.todotty("dag1");
 	sl.set_dag0_size(dag0.size());
 	while (sl.build_SCC_map(dag0, dag1)) ; // builds map while removing doomed, until fixpoint.
-	if (!sl.is_map_consistent(dag0, dag1))
-		fatal_error("main(): SCC mapping is cyclic.");
+    // TODO temporarely disabled
+	// if (!sl.is_map_consistent(dag0, dag1))
+	// 	fatal_error("main(): SCC mapping is cyclic.");
 	sl.declare_syntactic_equivalent(syntactic_equivalent_list);
 
 	sl.decompose(dag0, dag1, givenNames0, givenNames1, side0_fpath, side1_fpath); // This is the main workhorse.
