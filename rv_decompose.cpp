@@ -449,6 +449,7 @@ class DAG : public mygraph
 	int scc_count;
 	vector<bool> m_is_recursive;     // whether a node in the scc DAG is recursive
 	vector<bool> m_is_doomed; // whether a node in the scc DAG should not be checked, because either it or one of its descendants are recursive and cannot be proven equivalent.
+	vector<bool> m_is_potentially_doomed; // Parents of doomed nodes
 	vector<vector<int> > SCC_list;
 
 public:
@@ -481,6 +482,28 @@ public:
 		    mark_ancestors_as_doomed(*ancestor, true, side0);
 	}
 
+    // With llreve there is no need to mark all ancestors as doomed, we thus only mark them as potentially doomed
+    // 'leaf' indicates whether we are the bottom node that should be marked as doomed or one of its parents which only need to be marked as potentially doomed
+	void mark_ancestors_as_potentially_doomed(int i, bool leaf, bool side0)
+	{
+		if (leaf) {
+            if (is_doomed(i)) {
+                return;
+            }
+            set_doomed(i);
+        } else {
+            if (is_potentially_doomed(i)) {
+                return;
+            }
+            set_potentially_doomed(i);
+        }
+		if (side0) Console::Write("Side 0:");
+		else Console::Write("Side 1:");
+		Console::WriteLine("SCC ", SCC_PREFIX, i, " is doomed.");
+		FORINT(list, ancestor, getParents(i))
+		    mark_ancestors_as_potentially_doomed(*ancestor, false, side0);
+	}
+
 	void build_DAG()
 	{
 		expand_graph(scc_count);
@@ -498,6 +521,7 @@ public:
 				tarjan(i, td);
 		print_SCCs(SCC_list);
 		m_is_doomed.resize(scc_count, false);
+		m_is_potentially_doomed.resize(scc_count, false);
 	}
 
 	int get_map_element(int i) const { return cg.get_scc(i); }
@@ -505,8 +529,10 @@ public:
 	void set_map_element(int i, int scc_idx) { cg.set_scc(i, scc_idx); }
 
 	bool is_doomed(int i) const { return m_is_doomed[i]; }
+	bool is_potentially_doomed(int i) const { return m_is_potentially_doomed[i]; }
 
 	void set_doomed(int i, bool v = true) { m_is_doomed[i] = v; }
+	void set_potentially_doomed(int i, bool v = true) { m_is_potentially_doomed[i] = v; }
 
 protected:
 	virtual std::string getNodePrefix(void) const {
@@ -749,7 +775,7 @@ public:
 			{
 			case 0:
 				Console::WriteLine("DAG 1: S", j, " cannot be mapped and cannot be inlined. Ancestors are doomed.");
-				dag1.set_doomed(j, true);
+				dag1.mark_ancestors_as_potentially_doomed(j, true, false);
 				changed = true;
 				break;
 			case 1:
@@ -782,7 +808,7 @@ public:
 			{
 			case 0:
 				Console::WriteLine("cannot be mapped and cannot be inlined. Ancestors are doomed.");
-				dag0.set_doomed(j, true);
+				dag0.mark_ancestors_as_potentially_doomed(j, true, true);
 				changed = true;
 				break;
 			case 1:
