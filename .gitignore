@@ -7,3 +7,6 @@ frama_out.txt
 frama_out_parsed.txt
 *.gv
 *.o
+llreve/*/*.rec.c
+llreve/*/*.tmp
+llreve/*/*~

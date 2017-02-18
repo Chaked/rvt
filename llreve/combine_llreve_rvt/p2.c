@@ -1,0 +1,31 @@
+void __CPROVER_assume(_Bool);
+int a[25];
+
+void bubble_sort(int *a, int sz) {
+    for (int i = sz - 1; i > 0; i--) {
+        for (int j = 0; j < i; j++) {
+            if (a[j] < a[j + 1]) {
+                int t = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = t;
+                a[j] = a[j];
+            }
+        }
+    }
+}
+
+int shitty_function(int *a, int n) {
+    int i = 0;
+    int j = 0;
+    while ((i <= n)) {
+        bubble_sort(a + 5 * j, 5);
+        i++;
+        j++;
+    }
+    return j;
+}
+
+int main() {
+    shitty_function(a, 25);
+    return 0;
+}
