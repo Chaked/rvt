@@ -906,13 +906,13 @@ public:
 			dag1.get_children(mapm[i], children);
 			for (unsigned int j = 0; j < children.size(); ++j)
 			{
+                int child = children[j];
                 // With llreve parents of doomed childs are no longer doomed so we need to skip these children here
-                if (dag0.is_doomed(j)) {
+                if (dag0.is_doomed(child)) {
                     continue;
                 }
 				int target = dag0_size;
 				//! if we do not remove unmapped then add here: if (children[j] is unmapped add its children to children and continue)
-				int child = children[j];
 				if (!dag1.get_is_SCC_recursive(child))
 				{
 					int f = dag1.get_SCC_line(child).front();
@@ -926,7 +926,7 @@ public:
 				}
 
 				for (int k = 0; k < dag0_size; ++k)
-					if (mapm[k] == children[j]) {
+					if (mapm[k] == child) {
 						target = k; break;
 					}
 				assert(target < dag0_size); // assserting that we found it.
@@ -1658,8 +1658,8 @@ void RVT_Decompose::Decompose_main( unsigned int CG0_SIZE, unsigned int CG1_SIZE
 	sl.set_dag0_size(dag0.size());
 	while (sl.build_SCC_map(dag0, dag1)) ; // builds map while removing doomed, until fixpoint.
     // TODO temporarely disabled due to assertion failures that I don’t understand.
-	// if (!sl.is_map_consistent(dag0, dag1))
-	// 	fatal_error("main(): SCC mapping is cyclic.");
+	if (!sl.is_map_consistent(dag0, dag1))
+		fatal_error("main(): SCC mapping is cyclic.");
 	sl.declare_syntactic_equivalent(syntactic_equivalent_list);
 
 	sl.decompose(dag0, dag1, givenNames0, givenNames1, side0_fpath, side1_fpath); // This is the main workhorse.
