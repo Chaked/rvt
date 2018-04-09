@@ -21,7 +21,7 @@ setenv INSTRUMENTFLAGS  "  --div-by-zero-check  --pointer-check  --bounds-check 
 
 if ($3 == -1) then
 	setenv CBMCFLAGS "$2.exe"  # 
-else then
+else
 	setenv CBMCFLAGS "--unwind $3  $2.exe"  # 
 endif
 

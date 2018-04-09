@@ -7,8 +7,10 @@ var uuid = require('node-uuid');
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 var path = require('path');
-// app.use(express.static(__dirname + '/frontend'));
-// app.get('/', (req, res) => res.sendFile(__dirname + '/frontend/index.html'));
+app.use(express.static(__dirname + '/frontend'));
+app.get('/', (req, res) => res.sendFile(__dirname + '/frontend/index.html'));
+
+app.get('/check', (req,res) => res.send('its working'));
 
 var SAMPLE_FOLDER = "samples"
 var SAMPLE_PROGRAM1_FILE_NAME = "p1.txt";

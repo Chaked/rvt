@@ -10,3 +10,4 @@ frama_out_parsed.txt
 llreve/*/*.rec.c
 llreve/*/*.tmp
 llreve/*/*~
+build/
