@@ -1,33 +1,39 @@
+var winston = require('winston');
+winston.add(winston.transports.File, { filename: 'rvt.log' });
+winston.remove(winston.transports.Console);
+winston.add(winston.transports.Console, {'timestamp':true});
 var express = require('express');
+
 var app = express();
-var http = require('http').Server(app);
+var http = require('http').Server(app);//https for secure connection doesn't work for some reasons.
 var io = require('socket.io')(http);
 var fs = require('fs');
 var uuid = require('node-uuid');
 var mkdirp = require('mkdirp');
 var rimraf = require('rimraf');
 var path = require('path');
+
 app.use(express.static(__dirname + '/frontend'));
 app.get('/', (req, res) => res.sendFile(__dirname + '/frontend/index.html'));
 
-app.get('/check', (req,res) => res.send('its working'));
+app.get('/check', (req,res) => res.send('working'));
 
-var SAMPLE_FOLDER = "samples"
+var HOME_FOLDER = path.resolve('.');
+var SAMPLE_FOLDER = path.join(HOME_FOLDER, "samples");
 var SAMPLE_PROGRAM1_FILE_NAME = "p1.txt";
 var SAMPLE_PROGRAM2_FILE_NAME = "p2.txt";
 var SAMPLE_PARAMETERS_FILE_NAME = "prms.txt";
-var RV_PATH = path.resolve(path.join('..', 'Debug', 'rv.exe'));
+var RV_PATH = path.resolve(path.join('..', 'build', 'rvt'));
 var RESULT_FILE = 'rv_out.gv';
 var FUF_FILE = 'rv_pe.fuf';
 var FUF_COMMAND = '-fuf ' + FUF_FILE;
 var LISTENING_PORT = 3017;
 var MUTUAL_TERMINATION_PARAM = '-mt';
 
-
 io.on('connection', function(socket){
-  console.log('a user connected');
+  winston.info('a user connected');
   socket.on('disconnect', function(){
-    console.log('user disconnected');
+    winston.info('user disconnected');
   });
    socket.on('message', function(msg){
    		errFunc = err => {
@@ -35,31 +41,32 @@ io.on('connection', function(socket){
 						        return console.log(err);
 						    }
 						 };
-		console.log('Request received');
-		checkEquivalence(msg, socket);
+		winston.info('request received');
+  		checkEquivalence(msg, socket);
 	}); 
 
    socket.on('init_samples', function(sample_name){
-   		var sample_dirs = getDirectories('samples');
+   		var sample_dirs = getDirectories(SAMPLE_FOLDER);
    		var sample = readSample('Basecase not in sync')
    		sample.additional_samples = sample_dirs;
    		socket.emit('init_samples_response', sample);
    });
 
    socket.on('sample_request', function(sample_name){
-   		console.log(sample_name);
-
+   		winston.info('sample requested: ' + sample_name);
+  
    		var sample = readSample(sample_name)
    		socket.emit('sample_response', sample);
   	});
 });
 
-http.listen(LISTENING_PORT, () => console.log('listening on *:' + LISTENING_PORT));
+http.listen(LISTENING_PORT, () => winston.info('listening on: ' + LISTENING_PORT));
 
 function deleteFolder(folderName){
 	rimraf(folderName, function(err){
 		if (err) throw err;
-		console.log('Deleted temporary folder');
+		winston.info('deleted temporary folder');
+  
 	});
 }
 
@@ -73,12 +80,12 @@ function runRVT(socket, p1, p2, folderName, params){
 		// running rvt without mt to create rv_pe.fuf file
 		var rvtMtCommand = RV_PATH + ' ' + moddedParams + ' ' + p1 + ' ' + p2;
 
-		console.log('Running mt RVT: ' + rvtMtCommand);
+		winston.info('Running mt RVT: ' + rvtMtCommand);
 		
 		var cmd = exec(rvtMtCommand , {cwd: folderName},
 					(err, stdout, stderr) => {
 						  if (err) {
-						  	console.log(errText);
+						  	winston.info(errText);
 						    socket.emit('wait', errText);
 						    deleteFolder(folderName);
 						    return;
@@ -86,17 +93,17 @@ function runRVT(socket, p1, p2, folderName, params){
 							
 						var rvtCommand = RV_PATH + ' ' + FUF_COMMAND + ' ' + params + ' ' + p1 + ' ' + p2;
 
-						console.log('RVT pe is done, continue with mt proof: ' + rvtCommand);
+						winston.info('RVT pe is done, continue with mt proof: ' + rvtCommand);
 						var cmd = exec(rvtCommand , {cwd: folderName},
 								(err, stdout, stderr) => {
 									  if (err) {
-									  	console.log(errText);
+									  	winston.info(errText);
 									    socket.emit('wait', errText);
 									    deleteFolder(folderName);
 									    return;
 									  }
 								
-								console.log('RVT mt is done, sending results');
+								winston.info('RVT mt is done, sending results');
 								fs.readFile(path.join(folderName, RESULT_FILE), 'utf8', 
 						  		function(err, data) {
 								  	if (err) throw err;
@@ -114,17 +121,17 @@ function runRVT(socket, p1, p2, folderName, params){
 
 	}
 	else{
-		console.log('Running RVT');
+		winston.info('Running RVT');
 		var rvtCommand = RV_PATH + ' ' + params + ' ' + p1 + ' ' + p2;
 		var cmd = exec(rvtCommand , {cwd: folderName},
 					(err, stdout, stderr) => {
 						  if (err) {
-						  	console.log(errText);
+						  	winston.info(errText);
 						    socket.emit('wait', errText);
 						    deleteFolder(folderName);
 						    return;
 						  }
-						  console.log('RVT is done, sending result');
+						  winston.info('RVT is done, sending result');
 						
 						  fs.readFile(path.join(folderName, RESULT_FILE), 'utf8', 
 						  	function(err, data) {
@@ -135,7 +142,7 @@ function runRVT(socket, p1, p2, folderName, params){
 						  });
 	      cmd.stderr.on('data', function(data) {
 	      		errText += data.toString();
-	      		console.log(errText);
+	      		winston.info(errText);
 	    });
 	  }
 }
@@ -143,7 +150,7 @@ function runRVT(socket, p1, p2, folderName, params){
 
 function checkEquivalence(msg, socket) {
     var uid = uuid.v1();
-    var folderName = path.resolve(path.join('.', uid));
+    var folderName = path.resolve(path.join(HOME_FOLDER, uid));
 	mkdirp(folderName, function(err) { 
 		if (err) {
 			socket.emit('wait', 'Error creating dedicated folder');
