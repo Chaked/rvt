@@ -2,9 +2,12 @@
 float rv_mult(float x, float y);
 float rv_div(float x, float y);
 int rv_mod (int x, int y);
-# 1 "/cygdrive/c/gitrvt/rvtweb/samples/Basecase_not_in_sync/p1.c"
+# 1 "/home/rvt/rvtweb/f2407930-3d5b-11e8-990c-e30ab9bb76aa/p1.c"
+# 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "/cygdrive/c/gitrvt/rvtweb/samples/Basecase_not_in_sync/p1.c"
+# 1 "/usr/include/stdc-predef.h" 1 3 4
+# 1 "<command-line>" 2
+# 1 "/home/rvt/rvtweb/f2407930-3d5b-11e8-990c-e30ab9bb76aa/p1.c"
 int fact(int n){
    if (n <= 1) return 1;
    return n * fact(n-1);

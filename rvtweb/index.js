@@ -85,7 +85,7 @@ function runRVT(socket, p1, p2, folderName, params){
 		var cmd = exec(rvtMtCommand , {cwd: folderName},
 					(err, stdout, stderr) => {
 						  if (err) {
-						  	winston.info(errText);
+						  	winston.error(errText);
 						    socket.emit('wait', errText);
 						    deleteFolder(folderName);
 						    return;
@@ -97,7 +97,7 @@ function runRVT(socket, p1, p2, folderName, params){
 						var cmd = exec(rvtCommand , {cwd: folderName},
 								(err, stdout, stderr) => {
 									  if (err) {
-									  	winston.info(errText);
+									  	winston.error(errText);
 									    socket.emit('wait', errText);
 									    deleteFolder(folderName);
 									    return;
@@ -121,12 +121,13 @@ function runRVT(socket, p1, p2, folderName, params){
 
 	}
 	else{
-		winston.info('Running RVT');
+		
 		var rvtCommand = RV_PATH + ' ' + params + ' ' + p1 + ' ' + p2;
+		winston.info('Running RVT with: '+rvtCommand);
 		var cmd = exec(rvtCommand , {cwd: folderName},
 					(err, stdout, stderr) => {
 						  if (err) {
-						  	winston.info(errText);
+						  	winston.error(errText);
 						    socket.emit('wait', errText);
 						    deleteFolder(folderName);
 						    return;
@@ -142,7 +143,7 @@ function runRVT(socket, p1, p2, folderName, params){
 						  });
 	      cmd.stderr.on('data', function(data) {
 	      		errText += data.toString();
-	      		winston.info(errText);
+	      		winston.error(errText);
 	    });
 	  }
 }
@@ -160,7 +161,7 @@ function checkEquivalence(msg, socket) {
 		var p2Path = path.join(folderName, 'p2.c');
 		fs.writeFile(p1Path, msg.p1, errFunc);
 	    fs.writeFile(p2Path, msg.p2, errFunc);
-
+	    winston.info('Dedicated folder created: '+folderName);
 	    runRVT(socket, p1Path, p2Path, folderName, msg.prms);
 
     });
@@ -174,9 +175,9 @@ function getDirectories(srcpath) {
 }
 
 function readSample(sample_name){
-	var file1 = path.join('.', SAMPLE_FOLDER, sample_name, SAMPLE_PROGRAM1_FILE_NAME);
-   	var file2 = path.join('.', SAMPLE_FOLDER, sample_name, SAMPLE_PROGRAM2_FILE_NAME);
-   	var fileprm = path.join('.', SAMPLE_FOLDER, sample_name, SAMPLE_PARAMETERS_FILE_NAME);
+	var file1 = path.join(SAMPLE_FOLDER, sample_name, SAMPLE_PROGRAM1_FILE_NAME);
+   	var file2 = path.join(SAMPLE_FOLDER, sample_name, SAMPLE_PROGRAM2_FILE_NAME);
+   	var fileprm = path.join(SAMPLE_FOLDER, sample_name, SAMPLE_PARAMETERS_FILE_NAME);
 
    	var program1 = fs.readFileSync(file1).toString();
    	var program2 = fs.readFileSync(file2).toString();
