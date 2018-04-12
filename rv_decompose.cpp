@@ -38,7 +38,7 @@ static const bool HTML = false;
 static const char *RV_DOTTY_FILE = "rv_out.gv";
 
 static bool checkLlreve(int functionIndex, const std::vector<bool>& is_equivalent, const std::vector<bool>& is_equivalent0, std::string filePath1, std::string filePath2) {
-	RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
+    RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
     assert(pfp != nullptr);
     std::string functionName = pfp->name;
     if (RVLoop::is_loop_name(functionName, RVSide(0))) {
