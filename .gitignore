@@ -12,3 +12,5 @@ llreve/*/*.tmp
 llreve/*/*~
 build/
 rvtweb/rvt.log
+rv.vcxproj
+

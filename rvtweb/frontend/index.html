@@ -93,8 +93,8 @@
             <button disabled="true" id="-val" class="btn btn-info btn-block" data-toggle="tooltip" Title="Use this to strengthen the proof by using abstract interpretation">Value analysis</button>
             <button disabled="true" id="-main" class="btn btn-info btn-block" data-toggle="tooltip" Title="Use this in case you don't have a main function">Change main</button>
             <button disabled="true" id="-nooutline_funcs" class="btn btn-info btn-block" data-toggle="tooltip" Title="Use this to prevent rvt from converting arithmetic functions to ufs. This slows the proof.">Keep arithmetics</button>
-            <!-- <button id="-timeout" class="btn btn-info btn-block" data-toggle="tooltip" Title="Use this if you wish to limit the runnning time of rvt">Set timeout</button> -->
-            <!-- <button id="-mt" class="btn btn-info btn-block" data-toggle="tooltip" Title="Use this to perform mutual termination check">Check mutual termination</button> -->
+            <button disabled="true" id="-timeout" class="btn btn-info btn-block" data-toggle="tooltip" Title="Use this if you wish to limit the runnning time of rvt">Set timeout</button>
+            <button disabled="true" id="-mt" class="btn btn-info btn-block" data-toggle="tooltip" Title="Use this to perform mutual termination check">Check mutual termination</button>
           </div>
         </div>
         <div class="col-md-4">
@@ -152,7 +152,10 @@
 
             <dt class="col-sm-1">Black Line Color</dt>
             <dd class="col-sm-5">Functions are not syntactically equivalent</dd>
-          </dl>
+       	 <dt class="col-sm-1"> Octagon  shape</dt>
+            <dd class="col-sm-5">Functions are mutually terminating</dd>
+  
+	</dl>
         </div>   
     </div>
     <!-- Le javascript
