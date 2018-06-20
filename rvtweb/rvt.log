@@ -152,3 +152,27 @@
 {"level":"error","message":"Internal: j(needed by \"Loop_bubble_sort_for1_for1\") is not a global symbol,\n  but is not defined in caller's (\"Loop_bubble_sort_for1\") prototype arguments or internal scope !\n  at: \"/home/rvt/rvtweb/dc5d4a20-3d66-11e8-be9f-2198b2796b54/p1.c\", 9, 8 \nInternal: j(needed by \"Loop_bubble_sort_for1_for1\") is not a global symbol,\n  but is not defined in caller's (\"Loop_bubble_sort_for1\") prototype arguments or internal scope !\n  at: \"/home/rvt/rvtweb/dc5d4a20-3d66-11e8-be9f-2198b2796b54/p2.c\", 9, 8 \nrm: No match.\nWarning: allow UBS (-dk flag) for better check of functions with pointer argument(s).\n  in: Loop_bubble_sort_for1_for1 (side 0) \nIn file included from Loop_bubble_sort_for1_for1.rv.c:1:0:\nrv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'\n void* malloc(unsigned int);\r\n       ^\n( Loop_bubble_sort_for1_for1, Loop_bubble_sort_for1_for1 ) : passed\nIn file included from Loop_bubble_sort_for1.rv.c:1:0:\nrv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'\n void* malloc(unsigned int);\r\n       ^\n( Loop_bubble_sort_for1, Loop_bubble_sort_for1 ) : passed\n\nEXECUTING llreve.py -z3 /home/rvt/rvtweb/dc5d4a20-3d66-11e8-be9f-2198b2796b54/p1.c /home/rvt/rvtweb/dc5d4a20-3d66-11e8-be9f-2198b2796b54/p2.c -infer-marks -fun init_array\n\n( init_array, init_array ) : passed\n( bubble_sort, bubble_sort ) : passed\n\nEXECUTING llreve.py -z3 /home/rvt/rvtweb/dc5d4a20-3d66-11e8-be9f-2198b2796b54/p1.c /home/rvt/rvtweb/dc5d4a20-3d66-11e8-be9f-2198b2796b54/p2.c -infer-marks -fun main --assume-equivalent=init_array,init_array --assume-equivalent=bubble_sort,bubble_sort\n\n( main, main ) : passed\nOutput graph written to rv_out.gv\n","timestamp":"2018-04-11T09:01:04.607Z"}
 {"level":"info","message":"RVT is done, sending result","timestamp":"2018-04-11T09:01:04.609Z"}
 {"level":"info","message":"deleted temporary folder","timestamp":"2018-04-11T09:01:04.635Z"}
+{"level":"info","message":"listening on: 3017","timestamp":"2018-06-20T22:45:26.341Z"}
+{"level":"info","message":"a user connected","timestamp":"2018-06-20T22:45:51.372Z"}
+{"level":"info","message":"request received","timestamp":"2018-06-20T22:45:55.343Z"}
+{"level":"info","message":"Dedicated folder created: /home/rvt/rvtweb/b124f810-74db-11e8-b145-0d16337f2f44","timestamp":"2018-06-20T22:45:55.348Z"}
+{"level":"info","message":"Running RVT with: /home/rvt/build/rvt -sprtbase /home/rvt/rvtweb/b124f810-74db-11e8-b145-0d16337f2f44/p1.c /home/rvt/rvtweb/b124f810-74db-11e8-b145-0d16337f2f44/p2.c","timestamp":"2018-06-20T22:45:55.349Z"}
+{"level":"error","message":"rm: No match.\n","timestamp":"2018-06-20T22:45:57.135Z"}
+{"level":"error","message":"rm: No match.\n(","timestamp":"2018-06-20T22:45:57.301Z"}
+{"level":"info","message":"listening on: 3017","timestamp":"2018-06-20T22:48:07.980Z"}
+{"level":"info","message":"a user connected","timestamp":"2018-06-20T22:48:19.334Z"}
+{"level":"info","message":"sample requested: gcd","timestamp":"2018-06-20T22:48:34.892Z"}
+{"level":"info","message":"request received","timestamp":"2018-06-20T22:48:37.373Z"}
+{"level":"info","message":"Dedicated folder created: /home/rvt/rvtweb/11b8a1e0-74dc-11e8-9289-1915984c2ee5","timestamp":"2018-06-20T22:48:37.377Z"}
+{"level":"info","message":"Running RVT with: /home/rvt/build/rvt     /home/rvt/rvtweb/11b8a1e0-74dc-11e8-9289-1915984c2ee5/p1.c /home/rvt/rvtweb/11b8a1e0-74dc-11e8-9289-1915984c2ee5/p2.c","timestamp":"2018-06-20T22:48:37.378Z"}
+{"level":"error","message":"rm: No match.\n","timestamp":"2018-06-20T22:48:37.643Z"}
+{"level":"error","message":"rm: No match.\n(","timestamp":"2018-06-20T22:48:37.661Z"}
+{"level":"error","message":"rm: No match.\n( rv_mod_short__short_, rv_mod_short__short_ ) : passed\n( swap, swap ) : passed\n( Loop_gcd_while1, Loop_gcd_while1 ) : passed\n( gcd, gcd ) : passed\n( main, main ) : passed\nOutput graph written to rv_out.gv\n","timestamp":"2018-06-20T22:48:37.662Z"}
+{"level":"info","message":"RVT is done, sending result","timestamp":"2018-06-20T22:48:37.665Z"}
+{"level":"info","message":"deleted temporary folder","timestamp":"2018-06-20T22:48:37.743Z"}
+{"level":"info","message":"sample requested: Basecase not in sync","timestamp":"2018-06-20T22:49:08.801Z"}
+{"level":"info","message":"request received","timestamp":"2018-06-20T22:49:13.357Z"}
+{"level":"info","message":"Dedicated folder created: /home/rvt/rvtweb/272b5ae0-74dc-11e8-9289-1915984c2ee5","timestamp":"2018-06-20T22:49:13.359Z"}
+{"level":"info","message":"Running RVT with: /home/rvt/build/rvt -sprtbase /home/rvt/rvtweb/272b5ae0-74dc-11e8-9289-1915984c2ee5/p1.c /home/rvt/rvtweb/272b5ae0-74dc-11e8-9289-1915984c2ee5/p2.c","timestamp":"2018-06-20T22:49:13.359Z"}
+{"level":"error","message":"rm: No match.\n","timestamp":"2018-06-20T22:49:13.608Z"}
+{"level":"error","message":"rm: No match.\n(","timestamp":"2018-06-20T22:49:13.624Z"}
