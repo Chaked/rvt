@@ -724,7 +724,7 @@ public:
 	  iteration(0),
 	  mapf0(0), mapf1(0), mapm(0),
 	  m_semchecker(semchecker),
-	  is_equivalent0(n0, false), is_equivalent1(n1, false),
+	  is_equivalent0(n0, Not_Equal), is_equivalent1(n1, Not_Equal),
 	  syntactic_equivalent(n0, false)
 	{
 	}
