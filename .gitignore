@@ -11,3 +11,4 @@ llreve/*/*.rec.c
 llreve/*/*.tmp
 llreve/*/*~
 build/
+rvtweb/rvt.log
