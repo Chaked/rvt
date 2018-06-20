@@ -37,8 +37,11 @@ static const char *EOL = "\n";
 static const bool HTML = false;
 static const char *RV_DOTTY_FILE = "rv_out.gv";
 
-static bool checkLlreve(int functionIndex, const std::vector<bool>& is_equivalent, const std::vector<bool>& is_equivalent0, std::string filePath1, std::string filePath2) {
-    RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
+enum Equivalence_Status {Not_Equal, RVT_Equal, LLREVE_Equal};
+
+static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>& is_equivalent, const std::vector<Equivalence_Status>& is_equivalent0, std::string filePath1, std::string filePath2) {
+    RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
+
     assert(pfp != nullptr);
     std::string functionName = pfp->name;
     if (RVLoop::is_loop_name(functionName, RVSide(0))) {
@@ -437,7 +440,7 @@ public:
 	void todotty_final(ofstream& dotty,
 			           const int side,
 			           const DAG& dag,
-			           const vector<bool>& is_equivalent,
+			           const vector<Equivalence_Status>& is_equivalent,
 			           const vector<bool>& syntactic_equivalent,
 			           const list<int>& Loop_functions,
 			           const vector<int>& mapf,
@@ -449,7 +452,7 @@ public:
 		sem_checked.at(i) = true;
 	}
 
-	bool is_loop(int idx) const {
+	bool is_loop(int idx) const { 
 		assert(idx < _size);
 		return m_is_loop[idx];
 	}
@@ -629,7 +632,7 @@ private:
 void mygraph::todotty_final(ofstream& dotty,
 		const int side,
 		const DAG& dag,
-		const vector<bool>& is_equivalent,
+		const vector<Equivalence_Status>& is_equivalent,
 		const vector<bool>& syntactic_equivalent,
 		const list<int>& Loop_functions,
 		const vector<int>& mapf,
@@ -642,6 +645,7 @@ void mygraph::todotty_final(ofstream& dotty,
 	static const string SyntacticEqualStyle = "color = \"blue\", "; // cannot be empty because after this text a comma is added
 	static const string NotSyntacticEqualStyle = " "; // peripheries = 2
 	static const string EqualStyle = "style = \"filled\", fillcolor = \"green\"";
+	static const string EqualStyleReve = "style = \"filled\", fillcolor = \"chartreuse2\"";
 	static const string NotEqualStyle = "style = \"filled\", fillcolor = \"white\"";
 	static const string MutTermStyle = "shape = \"octagon\", ";
 	static const string NonMutTermStyle = "shape = \"ellipse\", ";
@@ -707,8 +711,8 @@ class Solve
 
 	map<string, int> map_var2idx; // for modeling the optimization problem of find_S. maps between variable names and their index in the optimization model.
 	RVMain& m_semchecker;
-	vector<bool> is_equivalent0;   // whether a cg0 node was proven equivalent
-	vector<bool> is_equivalent1;   // whether a cg1 node was proven equivalent
+	vector<Equivalence_Status> is_equivalent0;   // whether a cg0 node was proven equivalent
+	vector<Equivalence_Status> is_equivalent1;   // whether a cg1 node was proven equivalent
 	vector<bool> syntactic_equivalent;     // in the stub Check and check_recursive, this input vector determines whether the result is true or false
 	list<string> negatedSolutions;
 
@@ -1138,7 +1142,7 @@ public:
 		else return false;
 	}
 
-	bool Check(int f0, const vector<int>& S, const DAG& dag0, const DAG& dag1, std::string side0_fpath, std::string side1_fpath) const
+	Equivalence_Status Check(int f0, const vector<int>& S, const DAG& dag0, const DAG& dag1, std::string side0_fpath, std::string side1_fpath) const
 	{
 		RVSemChecker semchecker(m_semchecker);
 		Console::WriteLine("Check (", f0, ",", mapf0[f0], ")");
@@ -1159,14 +1163,14 @@ public:
 			Console::WriteLine("completeness level = ", c);
 
 			if (c <= threshold)  // aborting branch if they call different UFs
-				return false;
+				return Not_Equal;
 		}
 
 		Console::Write("Syntactic-equivalence test: ");
 		if (syntactic_equivalent[f0] && all_children_equiv)
 		{
 			Console::WriteLine("passed.");
-			return true;
+			return RVT_Equal;
 		}
 
 		dag0.cg.set_sem_checked(f0);
@@ -1177,21 +1181,21 @@ public:
         bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath);
         Console::WriteLine(llreveResult ? "equivalent" : "unknown");
         if (llreveResult) {
-            return true;
+            return LLREVE_Equal;
         }
 
 		Console::WriteLine("Semantic equivalence check:");
 		Console::WriteLine("-*-*-*-*-*-*-*  In  -*-*-*-*-*-*-*-*-*-*-");
 		RVCommands::ResCode res = semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
 		Console::WriteLine("-*-*-*-*-*-*-*  Out -*-*-*-*-*-*-*-*-*-*-");
-		return res == RVCommands::SUCCESS;
+		return res == RVCommands::SUCCESS ? RVT_Equal : Not_Equal;
 	}
 
-	void mark_equivalent(int i)
+	void mark_equivalent(int i, Equivalence_Status status)
 	{
 		int other = mapf0[i];
-		is_equivalent0[i] = true;
-		is_equivalent1[other] = true;
+		is_equivalent0[i] = status;
+		is_equivalent1[other] = status;
 		Console::WriteLine("mark_equivalent(", i, ",", mapf0[i], ")");
 	}
 
@@ -1245,24 +1249,25 @@ public:
 			if (!dag0.get_is_SCC_recursive(scc_index))
 			{ // trivial MSSCs
 				S.clear(); // This is the only difference from the recursive case.
-				if (Check(scc0[0], S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath)) {
-					mark_equivalent(scc0[0]);
+				Equivalence_Status status = Check(scc0[0], S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath);
+				if (status) {
+					mark_equivalent(scc0[0], status);
 					report(scc0[0], true, names0, names1);
 				}
 				else report (scc0[0], false, names0, names1);
 			}
 			else
 			{
-				bool ok_flag;
+				Equivalence_Status ok_flag;
 				vector<vector<int> > save_solutions(cg0.size());
 				negatedSolutions.clear();
 				while (true)
 				{
 					int failing_node = -1;
-					ok_flag = true;
+					ok_flag = RVT_Equal;
 					Find_S(S, scc_index, cg0, cg1, scc0, scc1);
 					// stub_find_S(scc0, scc0); // if we want to avoid minisat, can use this alternative, which returns the intersection between scc0, scc0. This is unsound if the intersection does not break all cycles.
-					if (S.size() == 0) { ok_flag = false; break; }
+					if (S.size() == 0) { ok_flag = Not_Equal; break; }
 					// "for all <f,g> \in S if !Check1(f,g,S) abort."
 					for (unsigned int i = 0; i < S.size(); ++i)
 					{
@@ -1303,7 +1308,7 @@ public:
 				//  for all <f,g> \in S mark <f,g> as "equivalent"
 				else
 					FORINT (vector, it, S) {
-					mark_equivalent(*it);
+					mark_equivalent(*it, ok_flag);
 					report(*it, true, names0, names1);
 				}
 			}
@@ -1329,11 +1334,11 @@ public:
 		return syntactic_equivalent;
 	}
 
-	const vector<bool>& get_equivalence_vec0(void) const {
+	const vector<Equivalence_Status>& get_equivalence_vec0(void) const {
 		return is_equivalent0;
 	}
 
-	const vector<bool>& get_equivalence_vec1(void) const {
+	const vector<Equivalence_Status>& get_equivalence_vec1(void) const {
 		return is_equivalent1;
 	}
 
