@@ -682,7 +682,7 @@ void mygraph::todotty_final(ofstream& dotty,
 		//background (semantic equivalence):
 		bool partially_equiv = checking_partial_equiv? is_equivalent[j]
 		                                             : rv_ufs.isFuncPairSemanticallyEqual(j, side);
-		dotty << (partially_equiv? EqualStyle : NotEqualStyle);
+		dotty << (partially_equiv? (partially_equiv == RVT_Equal? EqualStyle: EqualStyleReve ): NotEqualStyle);
 		dotty << "]" << endl;
 	}
 	for (int j = 0; j < _size; j++)
