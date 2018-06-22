@@ -37,8 +37,12 @@ static const char *EOL = "\n";
 static const bool HTML = false;
 static const char *RV_DOTTY_FILE = "rv_out.gv";
 
+enum Equivalence_Status { Not_Equal, RVT_Equal, LLREVE_Equal };
+
+
 static bool checkLlreve(int functionIndex, const std::vector<bool>& is_equivalent, const std::vector<bool>& is_equivalent0, std::string filePath1, std::string filePath2) {
-    RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
+    RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
+
     assert(pfp != nullptr);
     std::string functionName = pfp->name;
     if (RVLoop::is_loop_name(functionName, RVSide(0))) {
@@ -709,6 +713,9 @@ class Solve
 	RVMain& m_semchecker;
 	vector<bool> is_equivalent0;   // whether a cg0 node was proven equivalent
 	vector<bool> is_equivalent1;   // whether a cg1 node was proven equivalent
+	vector<bool> llreve_is_equivalent0;   // Monitor whether the function was proved equal by llreve or rvt
+	vector<bool> llreve_is_equivalent1;   // true means it is proven by llreve. The main motivation of this vector
+										// is to show in the website who proved the equivalence.
 	vector<bool> syntactic_equivalent;     // in the stub Check and check_recursive, this input vector determines whether the result is true or false
 	list<string> negatedSolutions;
 
@@ -721,6 +728,7 @@ public:
 	  mapf0(0), mapf1(0), mapm(0),
 	  m_semchecker(semchecker),
 	  is_equivalent0(n0, false), is_equivalent1(n1, false),
+	  llreve_is_equivalent0(n0, false), llreve_is_equivalent1(n1, false),
 	  syntactic_equivalent(n0, false)
 	{
 	}
@@ -1138,7 +1146,7 @@ public:
 		else return false;
 	}
 
-	bool Check(int f0, const vector<int>& S, const DAG& dag0, const DAG& dag1, std::string side0_fpath, std::string side1_fpath) const
+	Equivalence_Status Check(int f0, const vector<int>& S, const DAG& dag0, const DAG& dag1, std::string side0_fpath, std::string side1_fpath) const
 	{
 		RVSemChecker semchecker(m_semchecker);
 		Console::WriteLine("Check (", f0, ",", mapf0[f0], ")");
@@ -1159,14 +1167,14 @@ public:
 			Console::WriteLine("completeness level = ", c);
 
 			if (c <= threshold)  // aborting branch if they call different UFs
-				return false;
+				return Not_Equal;
 		}
 
 		Console::Write("Syntactic-equivalence test: ");
 		if (syntactic_equivalent[f0] && all_children_equiv)
 		{
 			Console::WriteLine("passed.");
-			return true;
+			return RVT_Equal;
 		}
 
 		dag0.cg.set_sem_checked(f0);
@@ -1177,21 +1185,25 @@ public:
         bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath);
         Console::WriteLine(llreveResult ? "equivalent" : "unknown");
         if (llreveResult) {
-            return true;
+            return LLREVE_Equal;
         }
 
 		Console::WriteLine("Semantic equivalence check:");
 		Console::WriteLine("-*-*-*-*-*-*-*  In  -*-*-*-*-*-*-*-*-*-*-");
 		RVCommands::ResCode res = semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
 		Console::WriteLine("-*-*-*-*-*-*-*  Out -*-*-*-*-*-*-*-*-*-*-");
-		return res == RVCommands::SUCCESS;
+		return res == RVCommands::SUCCESS ? RVT_Equal : Not_Equal;
 	}
 
-	void mark_equivalent(int i)
+	void mark_equivalent(int i, bool proved_by_llreve)
 	{
 		int other = mapf0[i];
 		is_equivalent0[i] = true;
 		is_equivalent1[other] = true;
+		if (proved_by_llreve) {
+			llreve_is_equivalent0[i] = true;
+			llreve_is_equivalent1[other] = true;
+		}
 		Console::WriteLine("mark_equivalent(", i, ",", mapf0[i], ")");
 	}
 
@@ -1245,24 +1257,25 @@ public:
 			if (!dag0.get_is_SCC_recursive(scc_index))
 			{ // trivial MSSCs
 				S.clear(); // This is the only difference from the recursive case.
-				if (Check(scc0[0], S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath)) {
-					mark_equivalent(scc0[0]);
+				Equivalence_Status is_equal = Check(scc0[0], S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath);
+				if (is_equal) {
+					mark_equivalent(scc0[0], is_equal == LLREVE_Equal);
 					report(scc0[0], true, names0, names1);
 				}
 				else report (scc0[0], false, names0, names1);
 			}
 			else
 			{
-				bool ok_flag;
+				Equivalence_Status ok_flag;
 				vector<vector<int> > save_solutions(cg0.size());
 				negatedSolutions.clear();
 				while (true)
 				{
 					int failing_node = -1;
-					ok_flag = true;
+					ok_flag = RVT_Equal;
 					Find_S(S, scc_index, cg0, cg1, scc0, scc1);
 					// stub_find_S(scc0, scc0); // if we want to avoid minisat, can use this alternative, which returns the intersection between scc0, scc0. This is unsound if the intersection does not break all cycles.
-					if (S.size() == 0) { ok_flag = false; break; }
+					if (S.size() == 0) { ok_flag = Not_Equal; break; }
 					// "for all <f,g> \in S if !Check1(f,g,S) abort."
 					for (unsigned int i = 0; i < S.size(); ++i)
 					{
@@ -1303,7 +1316,7 @@ public:
 				//  for all <f,g> \in S mark <f,g> as "equivalent"
 				else
 					FORINT (vector, it, S) {
-					mark_equivalent(*it);
+					mark_equivalent(*it, ok_flag == LLREVE_Equal);
 					report(*it, true, names0, names1);
 				}
 			}
