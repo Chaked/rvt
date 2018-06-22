@@ -645,19 +645,21 @@ void mygraph::todotty_final(ofstream& dotty,
 	static const string SyntacticEqualStyle = "color = \"blue\", "; // cannot be empty because after this text a comma is added
 	static const string NotSyntacticEqualStyle = " "; // peripheries = 2
 	static const string EqualStyle = "style = \"filled\", fillcolor = \"green\"";
-	static const string EqualStyleReve = "style = \"filled\", fillcolor = \"chartreuse2\"";
+	static const string EqualStyleReve = "style = \"filled\", fillcolor = \"chartreuse3\"";
 	static const string NotEqualStyle = "style = \"filled\", fillcolor = \"white\"";
 	static const string MutTermStyle = "shape = \"octagon\", ";
 	static const string NonMutTermStyle = "shape = \"ellipse\", ";
 
 	dotty << "subgraph G" << side << "{ " << endl;
 	dotty << "side"<<side << "[label = P" << side << "]" << endl;
-	dotty << "node[color = black];" << endl;;
+	dotty << "node[color = black];" << endl;
+	rv_errstrm << "is_equal graph is: " ;
 	for (int j = 0; j < _size; j++)
 	{
 		if (!node_reported[j]) continue;
 		string node = DecompUtils::name(j, mapf[j], names, names_other);
 		dotty << node << side;
+		rv_errstrm << node << " - " << is_equivalent[j] << ", " ;
 		if (sem_checked[j])
 		{
 			if (HTML) dotty << "[label = <<" << SemcheckedStyle << ">" << node << "</" << SemcheckedStyle << ">>];" << endl;
@@ -682,7 +684,7 @@ void mygraph::todotty_final(ofstream& dotty,
 		//background (semantic equivalence):
 		bool partially_equiv = checking_partial_equiv? is_equivalent[j]
 		                                             : rv_ufs.isFuncPairSemanticallyEqual(j, side);
-		dotty << (partially_equiv? (partially_equiv == RVT_Equal? EqualStyle: EqualStyleReve ): NotEqualStyle);
+		dotty << (partially_equiv? (is_equivalent[j] == RVT_Equal? EqualStyle: EqualStyleReve ): NotEqualStyle);
 		dotty << "]" << endl;
 	}
 	for (int j = 0; j < _size; j++)
@@ -694,6 +696,7 @@ void mygraph::todotty_final(ofstream& dotty,
 			dotty << endl;
 	}
 	dotty << "}" << endl;
+	rv_errstrm << "\n" ;
 }
 
 class FormatException {};
