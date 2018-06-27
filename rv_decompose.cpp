@@ -1202,9 +1202,9 @@ public:
 		Console::WriteLine("mark_equivalent(", i, ",", mapf0[i], ")");
 	}
 
-	void report (int f, bool result, const vector<string>& names0, const vector<string>& names1) {
+	void report (int f, bool result, const vector<string>& names0, const vector<string>& names1, Equivalence_Status status) {
 		endl(rv_errstrm << "( " << names0.at(f) << ", " << names1.at(mapf0[f]) << " ) : "
-			  	        << (result? "passed" : "failed"));
+			  	        << (result? "passed" : "failed") << (status == RVT_Equal ? "RVT" : status == LLREVE_Equal ? "LLREVE" : ""));
 	}
 	
 	void decompose(DAG& dag0, DAG& dag1, const vector<string> &names0, const vector<string> &names1, std::string side0_fpath, std::string side1_fpath)
@@ -1225,7 +1225,7 @@ public:
 				Console::WriteLine(": doomed");
 				for (size_t i = 0; i < scc0.size(); i++)  {
 					if (mapf0[scc0[i]] > 0)
-						report(scc0[i], false, names0, names1);
+						report(scc0[i], false, names0, names1, Not_Equal);
 				}
 				continue;
 			}
@@ -1255,9 +1255,9 @@ public:
 				Equivalence_Status status = Check(scc0[0], S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath);
 				if (status) {
 					mark_equivalent(scc0[0], status);
-					report(scc0[0], true, names0, names1);
+					report(scc0[0], true, names0, names1,status);
 				}
-				else report (scc0[0], false, names0, names1);
+				else report (scc0[0], false, names0, names1,status);
 			}
 			else
 			{
@@ -1312,7 +1312,7 @@ public:
 				else
 					FORINT (vector, it, S) {
 					mark_equivalent(*it, ok_flag);
-					report(*it, true, names0, names1);
+					report(*it, true, names0, names1,ok_flag);
 				}
 			}
 
