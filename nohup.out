@@ -1,0 +1,177 @@
+
+> rvtbe@1.0.0 start /home/rvt/rvtweb
+> node index.js
+
+events.js:165
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE :::3017
+    at Server.setupListenHandle [as _listen2] (net.js:1346:14)
+    at listenInCluster (net.js:1387:12)
+    at Server.listen (net.js:1475:7)
+    at Object.<anonymous> (/home/rvt/rvtweb/index.js:63:6)
+    at Module._compile (internal/modules/cjs/loader.js:654:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:665:10)
+    at Module.load (internal/modules/cjs/loader.js:566:32)
+    at tryModuleLoad (internal/modules/cjs/loader.js:506:12)
+    at Function.Module._load (internal/modules/cjs/loader.js:498:3)
+    at Function.Module.runMain (internal/modules/cjs/loader.js:695:10)
+Emitted 'error' event at:
+    at emitErrorNT (net.js:1366:8)
+    at process._tickCallback (internal/process/next_tick.js:178:19)
+    at Function.Module.runMain (internal/modules/cjs/loader.js:697:11)
+    at startup (internal/bootstrap/node.js:201:19)
+    at bootstrapNodeJSCore (internal/bootstrap/node.js:516:3)
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! rvtbe@1.0.0 start: `node index.js`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the rvtbe@1.0.0 start script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /root/.npm/_logs/2018-07-01T20_19_09_935Z-debug.log
+
+> rvtbe@1.0.0 start /home/rvt/rvtweb
+> node index.js
+
+events.js:165
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE :::3017
+    at Server.setupListenHandle [as _listen2] (net.js:1346:14)
+    at listenInCluster (net.js:1387:12)
+    at Server.listen (net.js:1475:7)
+    at Object.<anonymous> (/home/rvt/rvtweb/index.js:63:6)
+    at Module._compile (internal/modules/cjs/loader.js:654:30)
+    at Object.Module._extensions..js (internal/modules/cjs/loader.js:665:10)
+    at Module.load (internal/modules/cjs/loader.js:566:32)
+    at tryModuleLoad (internal/modules/cjs/loader.js:506:12)
+    at Function.Module._load (internal/modules/cjs/loader.js:498:3)
+    at Function.Module.runMain (internal/modules/cjs/loader.js:695:10)
+Emitted 'error' event at:
+    at emitErrorNT (net.js:1366:8)
+    at process._tickCallback (internal/process/next_tick.js:178:19)
+    at Function.Module.runMain (internal/modules/cjs/loader.js:697:11)
+    at startup (internal/bootstrap/node.js:201:19)
+    at bootstrapNodeJSCore (internal/bootstrap/node.js:516:3)
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! rvtbe@1.0.0 start: `node index.js`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the rvtbe@1.0.0 start script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /root/.npm/_logs/2018-07-01T20_21_58_460Z-debug.log
+
+> rvtbe@1.0.0 start /home/rvt/rvtweb
+> node index.js
+
+2018-07-01T20:40:57.372Z - info: listening on: 3017
+2018-07-01T20:41:00.217Z - info: a user connected
+2018-07-01T20:41:04.618Z - info: sample requested: increase_in_call
+2018-07-01T20:41:08.657Z - info: request received
+2018-07-01T20:41:08.660Z - info: Dedicated folder created: /home/rvt/rvtweb/15467120-7d6f-11e8-b57e-757994be0721
+2018-07-01T20:41:08.661Z - info: Running RVT with: /home/rvt/build/rvt  /home/rvt/rvtweb/15467120-7d6f-11e8-b57e-757994be0721/p1.c /home/rvt/rvtweb/15467120-7d6f-11e8-b57e-757994be0721/p2.c
+2018-07-01T20:41:08.876Z - error: rm: No match.
+
+2018-07-01T20:41:08.892Z - error: rm: No match.
+(
+2018-07-01T20:41:08.895Z - error: rm: No match.
+( g, g ) : passed RVT
+
+2018-07-01T20:41:08.931Z - error: rm: No match.
+( g, g ) : passed RVT
+In file included from main.rv.c:1:0:
+rv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'
+ void* malloc(unsigned int);
+       ^
+
+2018-07-01T20:41:09.216Z - error: rm: No match.
+( g, g ) : passed RVT
+In file included from main.rv.c:1:0:
+rv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'
+ void* malloc(unsigned int);
+       ^
+( main, main ) : failed 
+is_equal graph is: main - 0, g - 1, 
+is_equal graph is: main - 0, g - 1, 
+Output graph written to rv_out.gv
+
+2018-07-01T20:41:09.220Z - info: RVT is done, sending result
+2018-07-01T20:41:09.272Z - info: deleted temporary folder
+2018-07-01T20:41:21.048Z - info: request received
+2018-07-01T20:41:21.049Z - info: Dedicated folder created: /home/rvt/rvtweb/1ca90180-7d6f-11e8-b57e-757994be0721
+2018-07-01T20:41:21.049Z - info: Running RVT with: /home/rvt/build/rvt  /home/rvt/rvtweb/1ca90180-7d6f-11e8-b57e-757994be0721/p1.c /home/rvt/rvtweb/1ca90180-7d6f-11e8-b57e-757994be0721/p2.c
+2018-07-01T20:41:21.251Z - error: rm: No match.
+
+2018-07-01T20:41:21.267Z - error: rm: No match.
+(
+2018-07-01T20:41:21.270Z - error: rm: No match.
+( g, g ) : passed RVT
+
+2018-07-01T20:41:21.306Z - error: rm: No match.
+( g, g ) : passed RVT
+In file included from main.rv.c:1:0:
+rv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'
+ void* malloc(unsigned int);
+       ^
+
+2018-07-01T20:41:21.597Z - error: rm: No match.
+( g, g ) : passed RVT
+In file included from main.rv.c:1:0:
+rv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'
+ void* malloc(unsigned int);
+       ^
+( main, main ) : failed 
+is_equal graph is: main - 0, g - 1, 
+is_equal graph is: main - 0, g - 1, 
+Output graph written to rv_out.gv
+
+2018-07-01T20:41:21.599Z - info: RVT is done, sending result
+2018-07-01T20:41:21.663Z - info: deleted temporary folder
+
+> rvtbe@1.0.0 start /home/rvt/rvtweb
+> node index.js
+
+2018-07-01T20:42:05.960Z - info: listening on: 3017
+2018-07-01T20:42:09.497Z - info: a user connected
+2018-07-01T20:42:11.482Z - info: request received
+2018-07-01T20:42:11.486Z - info: Dedicated folder created: /home/rvt/rvtweb/3ab8c6b0-7d6f-11e8-a964-e36310bc6b32
+2018-07-01T20:42:11.486Z - info: Running RVT with: /home/rvt/build/rvt  /home/rvt/rvtweb/3ab8c6b0-7d6f-11e8-a964-e36310bc6b32/p1.c /home/rvt/rvtweb/3ab8c6b0-7d6f-11e8-a964-e36310bc6b32/p2.c
+2018-07-01T20:42:11.697Z - error: rm: No match.
+
+2018-07-01T20:42:11.712Z - error: rm: No match.
+(
+2018-07-01T20:42:11.715Z - error: rm: No match.
+( g, g ) : passed RVT
+
+2018-07-01T20:42:11.751Z - error: rm: No match.
+( g, g ) : passed RVT
+In file included from main.rv.c:1:0:
+rv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'
+ void* malloc(unsigned int);
+       ^
+
+2018-07-01T20:47:52.223Z - error: rm: No match.
+( g, g ) : passed RVT
+In file included from main.rv.c:1:0:
+rv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'
+ void* malloc(unsigned int);
+       ^
+Terminated
+
+2018-07-01T20:47:52.225Z - error: rm: No match.
+( g, g ) : passed RVT
+In file included from main.rv.c:1:0:
+rv_declarations.h:13:7: warning: conflicting types for built-in function 'malloc'
+ void* malloc(unsigned int);
+       ^
+Terminated
+
+2018-07-01T20:47:52.246Z - info: deleted temporary folder

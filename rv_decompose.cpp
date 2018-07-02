@@ -66,7 +66,7 @@ static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>
     ostringstream llreveCommand;
     llreveCommand << "llreve.py -z3 " << filePath1 << " " << filePath2
                   << " -infer-marks -fun " << functionName;
-    for (size_t i = 0; i < is_equivalent.size(); ++i) {
+/*    for (size_t i = 0; i < is_equivalent.size(); ++i) {
         if (is_equivalent[i]) {
             RVFuncPair* pfp = rv_ufs.getFuncPairById(i, 0, true);
             std::string equalName = pfp->name;
@@ -78,7 +78,7 @@ static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>
             }
             llreveCommand << " --assume-equivalent=" << equalName << "," << equalName;
         }
-    }
+    }*/
     rv_errstrm << "\nEXECUTING " << llreveCommand.str() << "\n\n";
     std::unique_ptr<FILE, std::function<int(FILE*)>>
         pipe(popen(llreveCommand.str().c_str(), "r"),
@@ -87,6 +87,7 @@ static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>
         if (fgets(buffer.data(), 128, pipe.get()) != NULL)
             llreveOutput += buffer.data();
     }
+    rv_errstrm << "REVE RESULT: " << llreveOutput;
     return llreveOutput == "EQUAL\n";
 }
 
@@ -1179,14 +1180,14 @@ public:
 		dag0.cg.set_sem_checked(f0);
 		dag1.cg.set_sem_checked(mapf0[f0]);
 		Console::WriteLine("failed.");
-
+/*
         Console::Write("Reve test: ");
         bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath);
         Console::WriteLine(llreveResult ? "equivalent" : "unknown");
         if (llreveResult) {
             return LLREVE_Equal;
         }
-
+*/
 		Console::WriteLine("Semantic equivalence check:");
 		Console::WriteLine("-*-*-*-*-*-*-*  In  -*-*-*-*-*-*-*-*-*-*-");
 		RVCommands::ResCode res = semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
@@ -1204,7 +1205,7 @@ public:
 
 	void report (int f, bool result, const vector<string>& names0, const vector<string>& names1, Equivalence_Status status) {
 		endl(rv_errstrm << "( " << names0.at(f) << ", " << names1.at(mapf0[f]) << " ) : "
-			  	        << (result? "passed" : "failed") << (status == RVT_Equal ? "RVT" : status == LLREVE_Equal ? "LLREVE" : ""));
+			  	        << (result? "passed " : "failed ") << (status == RVT_Equal ? "RVT" : status == LLREVE_Equal ? "LLREVE" : ""));
 	}
 	
 	void decompose(DAG& dag0, DAG& dag1, const vector<string> &names0, const vector<string> &names1, std::string side0_fpath, std::string side1_fpath)

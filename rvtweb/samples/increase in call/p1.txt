@@ -1,0 +1,11 @@
+extern int __mark(int);
+
+
+  int g(int x) {
+    return x;
+  }
+
+  int main(int n) {
+    int x = g(n);
+    return x+1;
+  }
