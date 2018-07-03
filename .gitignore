@@ -12,5 +12,5 @@ llreve/*/*.tmp
 llreve/*/*~
 build/
 rvtweb/rvt.log
-rv.vcxproj
+reve_service/out.smt2
 
