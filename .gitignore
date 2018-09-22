@@ -10,3 +10,6 @@ frama_out_parsed.txt
 llreve/*/*.rec.c
 llreve/*/*.tmp
 llreve/*/*~
+build/
+rvtweb/node_modules/
+rvtweb/package-lock.json
