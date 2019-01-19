@@ -692,7 +692,7 @@ RVIntStatus RVMain::main(void) {
 	if(DBG) rv_errstrm << DBG_INFO << "after convert_loops - reparse\n";	
 
 	if (RVGlob::flags(RVGlob::GLBL_OUTLINE)) {  // adding rv_mult, rv_div, rv_mod. Need actual functions because of 1) possible use of -refine, and 2) some of these functions can be used only on one side.
-		rv_parser.add_outline_bodies(side0_fpath, side1_fpath, refined);
+ 		rv_parser.add_outline_bodies(side0_fpath, side1_fpath, refined);
 		RVGlob::flags(RVGlob::GLBL_OUTLINE_NOW, 0); // so next time we parse, '*' inside the definition of rv_mult() won't turn into rv_mult().
 	}
 	

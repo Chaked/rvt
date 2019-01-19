@@ -6,12 +6,13 @@
         "remoteMachineName": "${defaultRemoteMachineName}",
         "configurationType": "Debug",
         "remoteCMakeListsRoot": "/var/tmp/src/${workspaceHash}/${name}",
-        "cmakeExecutable": "/usr/local/bin/cmake",
+        /*"cmakeExecutable": "/usr/bin/cmake",*/
+        "cmakeExecutable": "/usr/local/bin/cmake",/* - use this on rvt.technion.ac.il*/
         "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
         "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
         "remoteBuildRoot": "/var/tmp/src/${workspaceHash}/${name}/build",
         "remoteInstallRoot": "/var/tmp/src/${workspaceHash}/install/${name}",
-        "remoteCopySources": false,
+        "remoteCopySources": true,
         "remoteCopySourcesOutputVerbosity": "Normal",
         "remoteCopySourcesConcurrentCopies": "10",
         "remoteCopySourcesMethod": "sftp",
