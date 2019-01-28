@@ -37,7 +37,7 @@ static const char *EOL = "\n";
 static const bool HTML = false;
 static const char *RV_DOTTY_FILE = "rv_out.gv";
 
-enum Equivalence_Status {Not_Equal, RVT_Equal, LLREVE_Equal};
+enum Equivalence_Status {Not_Equal, RVT_Equal, LLREVE_Equal, Syntactic_Equal};
 
 static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>& is_equivalent, const std::vector<Equivalence_Status>& is_equivalent0, std::string filePath1, std::string filePath2) {
     RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
@@ -645,8 +645,9 @@ void mygraph::todotty_final(ofstream& dotty,
 	static const string NotSemcheckedStyle = HTML ? "I" : "fontcolor = \"grey\"";
 	static const string SyntacticEqualStyle = "color = \"blue\", "; // cannot be empty because after this text a comma is added
 	static const string NotSyntacticEqualStyle = " "; // peripheries = 2
-	static const string EqualStyle = "style = \"filled\", fillcolor = \"green\"";
+	static const string EqualStyleRVT = "style = \"filled\", fillcolor = \"green\"";
 	static const string EqualStyleReve = "style = \"filled\", fillcolor = \"chartreuse3\"";
+	static const string EqualStyleSyntactic = "style = \"filled\", fillcolor = \"cadetblue1\"";
 	static const string NotEqualStyle = "style = \"filled\", fillcolor = \"white\"";
 	static const string MutTermStyle = "shape = \"octagon\", ";
 	static const string NonMutTermStyle = "shape = \"ellipse\", ";
@@ -685,7 +686,14 @@ void mygraph::todotty_final(ofstream& dotty,
 		//background (semantic equivalence):
 		bool partially_equiv = checking_partial_equiv? is_equivalent[j]
 		                                             : rv_ufs.isFuncPairSemanticallyEqual(j, side);
-		dotty << (partially_equiv? (is_equivalent[j] == RVT_Equal? EqualStyle: EqualStyleReve ): NotEqualStyle);
+		// Unfortuntly I can't take this out as a function because all the consts are declared inside this function :O
+		string background_style = NotEqualStyle;
+		switch (is_equivalent[j]) {
+			case RVT_Equal: background_style = EqualStyleRVT; break;
+			case LLREVE_Equal: background_style =  EqualStyleReve; break;
+			case Syntactic_Equal: background_style = EqualStyleSyntactic; break;
+		}
+		dotty << (partially_equiv ? background_style : NotEqualStyle);
 		dotty << "]" << endl;
 	}
 	for (int j = 0; j < _size; j++)
@@ -1176,25 +1184,31 @@ public:
 		if (syntactic_equivalent[f0] && all_children_equiv)
 		{
 			Console::WriteLine("passed.");
-			return RVT_Equal;
+			return Syntactic_Equal;
 		}
 
 		dag0.cg.set_sem_checked(f0);
 		dag1.cg.set_sem_checked(mapf0[f0]);
 		Console::WriteLine("failed.");
 
-        /*Console::Write("Reve test: ");
-        bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath);
-        Console::WriteLine(llreveResult ? "equivalent" : "unknown");
-        if (llreveResult) {
-            return LLREVE_Equal;
-        }*/
 
 		Console::WriteLine("Semantic equivalence check:");
+		Console::WriteLine("RVT Results: ");
 		Console::WriteLine("-*-*-*-*-*-*-*  In  -*-*-*-*-*-*-*-*-*-*-");
-		RVCommands::ResCode res = semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
+		RVCommands::ResCode rvtResult = semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
 		Console::WriteLine("-*-*-*-*-*-*-*  Out -*-*-*-*-*-*-*-*-*-*-");
-		return res == RVCommands::SUCCESS ? RVT_Equal : Not_Equal;
+
+		if (rvtResult == RVCommands::SUCCESS)
+			return RVT_Equal;
+
+		
+		Console::Write("Reve Results: ");
+		bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath);
+		Console::WriteLine(llreveResult ? "equivalent" : "unknown");
+		if (llreveResult)
+			return LLREVE_Equal;
+
+		return Not_Equal;
 	}
 
 	void mark_equivalent(int i, Equivalence_Status status)
@@ -1205,9 +1219,19 @@ public:
 		Console::WriteLine("mark_equivalent(", i, ",", mapf0[i], ")");
 	}
 
+	string status_to_string(Equivalence_Status status) const {
+		switch (status) {
+			case RVT_Equal: return "RVT";
+			case LLREVE_Equal: return "LLREVE";
+			case Syntactic_Equal: return "Syntactic Equivalence";
+		}
+		//Not_Equal
+		return "";
+	}
+
 	void report (int f, bool result, const vector<string>& names0, const vector<string>& names1, Equivalence_Status status) {
 		endl(rv_errstrm << "( " << names0.at(f) << ", " << names1.at(mapf0[f]) << " ) : "
-			  	        << (result? "passed " : "failed ") << (status == RVT_Equal ? "RVT" : status == LLREVE_Equal ? "LLREVE" : ""));
+			  	        << (result? "passed " : "failed ") << status_to_string(status));
 	}
 	
 	void decompose(DAG& dag0, DAG& dag1, const vector<string> &names0, const vector<string> &names1, std::string side0_fpath, std::string side1_fpath)
