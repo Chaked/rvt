@@ -17,3 +17,6 @@ rvtweb/node_modules
 rvtweb/package-lock.json
 rvt.vcxproj
 rvt.vcxproj.user
+.idea
+.vs
+cmake-build-debug

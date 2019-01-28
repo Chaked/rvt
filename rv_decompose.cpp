@@ -818,7 +818,8 @@ public:
 			{
 			case 0:
 				Console::WriteLine("DAG 1: S", j, " cannot be mapped and cannot be inlined. Ancestors are doomed.");
-				dag1.mark_ancestors_as_potentially_doomed(j, true, false);
+				//Moritz - dag1.mark_ancestors_as_potentially_doomed(j, true, false);
+				dag1.mark_ancestors_as_doomed(j, true, false);
 				changed = true;
 				break;
 			case 1:
@@ -851,7 +852,8 @@ public:
 			{
 			case 0:
 				Console::WriteLine("cannot be mapped and cannot be inlined. Ancestors are doomed.");
-				dag0.mark_ancestors_as_potentially_doomed(j, true, true);
+				//Moritz - dag0.mark_ancestors_as_potentially_doomed(j, true, true);
+				dag0.mark_ancestors_as_doomed(j, true, true);
 				changed = true;
 				break;
 			case 1:
@@ -916,10 +918,10 @@ public:
 			for (unsigned int j = 0; j < children.size(); ++j)
 			{
                 int child = children[j];
-                // With llreve parents of doomed childs are no longer doomed so we need to skip these children here
-                if (dag0.is_doomed(child)) {
+                // Moritz - With llreve parents of doomed childs are no longer doomed so we need to skip these children here
+                /*if (dag0.is_doomed(child)) {
                     continue;
-                }
+                }*/
 				int target = dag0_size;
 				//! if we do not remove unmapped then add here: if (children[j] is unmapped add its children to children and continue)
 				if (!dag1.get_is_SCC_recursive(child))
@@ -1181,12 +1183,12 @@ public:
 		dag1.cg.set_sem_checked(mapf0[f0]);
 		Console::WriteLine("failed.");
 
-        Console::Write("Reve test: ");
+        /*Console::Write("Reve test: ");
         bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath);
         Console::WriteLine(llreveResult ? "equivalent" : "unknown");
         if (llreveResult) {
             return LLREVE_Equal;
-        }
+        }*/
 
 		Console::WriteLine("Semantic equivalence check:");
 		Console::WriteLine("-*-*-*-*-*-*-*  In  -*-*-*-*-*-*-*-*-*-*-");
@@ -1668,6 +1670,7 @@ void RVT_Decompose::Decompose_main( unsigned int CG0_SIZE, unsigned int CG1_SIZE
 	sl.set_dag0_size(dag0.size());
 	while (sl.build_SCC_map(dag0, dag1)) ; // builds map while removing doomed, until fixpoint.
     // TODO temporarely disabled due to assertion failures that I don’t understand.
+	// TODO: above was written by moritz. it was taken care by then, remove it soon when i finish. -chaked
 	if (!sl.is_map_consistent(dag0, dag1))
 		fatal_error("main(): SCC mapping is cyclic.");
 	sl.declare_syntactic_equivalent(syntactic_equivalent_list);

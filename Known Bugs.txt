@@ -1,0 +1,5 @@
+1) ON LINUX - when a file has spaces in his path and need to call the /tools/scripts/rv_outline_type_specific
+script, the program fails on "error: Failed outline_header command".
+for example: ./rvtweb/samples/combine\ llreve\ bubble\ sort/p*.txt
+
+
