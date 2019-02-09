@@ -39,7 +39,7 @@ static const char *RV_DOTTY_FILE = "rv_out.gv";
 
 enum Equivalence_Status {Not_Equal, RVT_Equal, LLREVE_Equal, Syntactic_Equal};
 
-static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>& is_equivalent, const std::vector<Equivalence_Status>& is_equivalent0, std::string filePath1, std::string filePath2) {
+static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>& is_equivalent, const std::vector<Equivalence_Status>& is_equivalent0, std::string filePath1, std::string filePath2, const vector<bool>& syntactic_equivalent) {
     RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
 
     assert(pfp != nullptr);
@@ -67,7 +67,7 @@ static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>
     llreveCommand << "llreve.py -z3 " << filePath1 << " " << filePath2
                   << " -infer-marks -fun " << functionName;
     for (size_t i = 0; i < is_equivalent.size(); ++i) {
-        if (is_equivalent[i]) {
+        if (is_equivalent[i]/* && !syntactic_equivalent[i]*/) {
             RVFuncPair* pfp = rv_ufs.getFuncPairById(i, 0, true);
             std::string equalName = pfp->name;
             if (RVLoop::is_loop_name(equalName, RVSide(0))) {
@@ -80,9 +80,11 @@ static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>
         }
     }
     rv_errstrm << "\nEXECUTING " << llreveCommand.str() << "\n\n";
+	std::string forDebugPurpose = llreveCommand.str();
     std::unique_ptr<FILE, std::function<int(FILE*)>>
         pipe(popen(llreveCommand.str().c_str(), "r"),
              pclose);
+	
     while (!feof(pipe.get())) {
         if (fgets(buffer.data(), 128, pipe.get()) != NULL)
             llreveOutput += buffer.data();
@@ -489,6 +491,7 @@ class DAG : public mygraph
 	vector<bool> m_is_recursive;     // whether a node in the scc DAG is recursive
 	vector<bool> m_is_doomed; // whether a node in the scc DAG should not be checked, because either it or one of its descendants are recursive and cannot be proven equivalent.
 	vector<bool> m_is_potentially_doomed; // Parents of doomed nodes
+	vector<bool> m_has_mapping_problem; // Whether a node in the scc DAG has any kind of mapping problem. it could be because there is no mapping for it or maybe it is mapped to more than one.
 	vector<vector<int> > SCC_list;
 
 public:
@@ -519,6 +522,26 @@ public:
 		Console::WriteLine("SCC ", SCC_PREFIX, i, " is doomed.");
 		FORINT(list, ancestor, getParents(i))
 		    mark_ancestors_as_doomed(*ancestor, true, side0);
+	}
+
+
+	/// <summary>
+	/// Marks ancestors as undoomed. With adding LLREVE there is a case where a node is doomed
+	/// but then LLREVE was able to prove equivalence for an accestor and then we need to change
+	/// the doom notion to all its ancestors.
+	/// </summary>
+	/// <param name="i">root</param>
+	/// <param name="mark">whether to mark the root itself as undoom. Generally yes other than the case in which the root was checked. </param>
+	/// <param name="side0"> side 0 or 1 </param>
+	void mark_ancestors_as_undoomed(int i, bool mark, bool side0)
+	{
+		if (!is_doomed(i)) return;
+		if (mark && !has_mapping_problem(i)) set_doomed(i, false);
+		if (side0) Console::Write("Side 0:");
+		else Console::Write("Side 1:");
+		Console::WriteLine("SCC ", SCC_PREFIX, i, " is undoomed now.");
+		FORINT(list, ancestor, getParents(i))
+			mark_ancestors_as_undoomed(*ancestor, true, side0);
 	}
 
     // With llreve there is no need to mark all ancestors as doomed, we thus only mark them as potentially doomed
@@ -561,6 +584,7 @@ public:
 		print_SCCs(SCC_list);
 		m_is_doomed.resize(scc_count, false);
 		m_is_potentially_doomed.resize(scc_count, false);
+		m_has_mapping_problem.resize(scc_count, false);
 	}
 
 	int get_map_element(int i) const { return cg.get_scc(i); }
@@ -569,9 +593,12 @@ public:
 
 	bool is_doomed(int i) const { return m_is_doomed[i]; }
 	bool is_potentially_doomed(int i) const { return m_is_potentially_doomed[i]; }
+	bool has_mapping_problem(int i) const { return m_has_mapping_problem[i]; }
+
 
 	void set_doomed(int i, bool v = true) { m_is_doomed[i] = v; }
 	void set_potentially_doomed(int i, bool v = true) { m_is_potentially_doomed[i] = v; }
+	void set_mapping_problem(int i, bool v = true) { m_has_mapping_problem[i] = v; }
 
 protected:
 	virtual std::string getNodePrefix(void) const {
@@ -686,7 +713,7 @@ void mygraph::todotty_final(ofstream& dotty,
 		//background (semantic equivalence):
 		bool partially_equiv = checking_partial_equiv? is_equivalent[j]
 		                                             : rv_ufs.isFuncPairSemanticallyEqual(j, side);
-		// Unfortuntly I can't take this out as a function because all the consts are declared inside this function :O
+		// Unfortuntly I can't export this switch to a function because all the consts are declared inside this function :O
 		string background_style = NotEqualStyle;
 		switch (is_equivalent[j]) {
 			case RVT_Equal: background_style = EqualStyleRVT; break;
@@ -815,11 +842,18 @@ public:
 			if (!(dag1.get_is_SCC_recursive(j)))
 			{
 				int f = dag1.get_SCC_line(j).front();
-				if (!is_mapped1(f))
+				if (!is_mapped1(f)) {
 					dag1.set_doomed(j, true);
+					dag1.set_mapping_problem(j, true);
+				}
 			}
-			if (dag1.is_doomed(j)) continue;
-
+			if (dag1.is_doomed(j)) {
+				// If we are here it means that one of our sons has a mapping problem.
+				// At this point we choose not to deal with it altought it might be possible.
+				// Therefor we set it as it has mapping problems as well but that's not necessary true. 
+				dag1.set_mapping_problem(j, true);
+				continue;
+			}
 			mycount = 0;
 			for (int i = 0; i < dag0.size(); ++i) if (a.get(i, j)) mycount++;
 			switch (mycount)
@@ -828,6 +862,7 @@ public:
 				Console::WriteLine("DAG 1: S", j, " cannot be mapped and cannot be inlined. Ancestors are doomed.");
 				//Moritz - dag1.mark_ancestors_as_potentially_doomed(j, true, false);
 				dag1.mark_ancestors_as_doomed(j, true, false);
+				dag1.set_mapping_problem(j, true);
 				changed = true;
 				break;
 			case 1:
@@ -836,6 +871,7 @@ public:
 			default:
 				Console::WriteLine("DAG 1: S", j, " is mapped to more than one SCC on side 0. Ancestors are doomed.");
 				dag1.mark_ancestors_as_doomed(j, true, false);
+				dag1.set_mapping_problem(j, true);
 				changed = true;
 				break;
 			}
@@ -849,10 +885,19 @@ public:
 			if (!(dag0.get_is_SCC_recursive(j)))
 			{
 				int f = dag0.get_SCC_line(j).front();
-				if (!is_mapped(f))
+				if (!is_mapped(f)) {
 					dag0.set_doomed(j, true);
+					dag0.set_mapping_problem(j,true);
+				}
 			}
-			if (dag0.is_doomed(j)) continue;
+			if (dag0.is_doomed(j)) {
+				// If we are here it means that one of our sons has a mapping problem.
+					// At this point we choose not to deal with it altought it might be possible.
+					// Therefor we set it as it has mapping problems as well but that's not necessary true. 
+				dag0.set_mapping_problem(j, true);
+				continue;
+			}
+
 			mycount = 0;
 			for (int i = 0; i < dag1.size(); ++i) if (a.get(j, i)) ++mycount;
 			Console::Write("DAG 0: S", j, ' ');
@@ -862,6 +907,7 @@ public:
 				Console::WriteLine("cannot be mapped and cannot be inlined. Ancestors are doomed.");
 				//Moritz - dag0.mark_ancestors_as_potentially_doomed(j, true, true);
 				dag0.mark_ancestors_as_doomed(j, true, true);
+				dag0.set_mapping_problem(j, true);
 				changed = true;
 				break;
 			case 1:
@@ -878,6 +924,7 @@ public:
 				{
 					Console::WriteLine("can only be mapped to DAG 1: S", to, ", which is doomed. Hence ancestors are doomed.");
 					dag0.mark_ancestors_as_doomed(j, true, true);
+					dag0.set_mapping_problem(j, true);
 					changed = true;
 				}
 				break;
@@ -885,6 +932,7 @@ public:
 			default:
 				Console::WriteLine("is mapped to more than one SCC on side 1! ancestors are doomed.");
 				dag0.mark_ancestors_as_doomed(j, true, true);
+				dag0.set_mapping_problem(j, true);
 				changed = true;
 				break;
 			}
@@ -925,12 +973,14 @@ public:
 			dag1.get_children(mapm[i], children);
 			for (unsigned int j = 0; j < children.size(); ++j)
 			{
-                int child = children[j];
+                
                 // Moritz - With llreve parents of doomed childs are no longer doomed so we need to skip these children here
-                /*if (dag0.is_doomed(child)) {
+				/*int child = children[j];
+                if (dag0.is_doomed(child)) {
                     continue;
                 }*/
 				int target = dag0_size;
+				int child = children[j];
 				//! if we do not remove unmapped then add here: if (children[j] is unmapped add its children to children and continue)
 				if (!dag1.get_is_SCC_recursive(child))
 				{
@@ -945,7 +995,7 @@ public:
 				}
 
 				for (int k = 0; k < dag0_size; ++k)
-					if (mapm[k] == child) {
+					if (mapm[k] == children[j]) {
 						target = k; break;
 					}
 				assert(target < dag0_size); // assserting that we found it.
@@ -1156,8 +1206,28 @@ public:
 		else return false;
 	}
 
+	
+	Equivalence_Status check_for_doomed(int f0, const vector<int>& S, const DAG& dag0, const DAG& dag1, std::string side0_fpath, std::string side1_fpath) const
+	{
+	
+		Console::WriteLine("Check when doomed (", f0, ",", mapf0[f0], ")");
+		
+		Console::Write("Reve Results: ");
+		bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath, syntactic_equivalent);
+		Console::WriteLine(llreveResult ? "equivalent" : "unknown");
+		if (llreveResult)
+			return LLREVE_Equal;
+
+		return Not_Equal;
+	}
+
 	Equivalence_Status Check(int f0, const vector<int>& S, const DAG& dag0, const DAG& dag1, std::string side0_fpath, std::string side1_fpath) const
 	{
+
+		if (dag0.is_doomed(f0) && !dag0.has_mapping_problem(f0))
+			return check_for_doomed(f0, S, dag0, dag1, side0_fpath, side1_fpath);
+		
+
 		RVSemChecker semchecker(m_semchecker);
 		Console::WriteLine("Check (", f0, ",", mapf0[f0], ")");
 		
@@ -1191,19 +1261,18 @@ public:
 		dag1.cg.set_sem_checked(mapf0[f0]);
 		Console::WriteLine("failed.");
 
-
+		
 		Console::WriteLine("Semantic equivalence check:");
 		Console::WriteLine("RVT Results: ");
 		Console::WriteLine("-*-*-*-*-*-*-*  In  -*-*-*-*-*-*-*-*-*-*-");
 		RVCommands::ResCode rvtResult = semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
 		Console::WriteLine("-*-*-*-*-*-*-*  Out -*-*-*-*-*-*-*-*-*-*-");
-
 		if (rvtResult == RVCommands::SUCCESS)
 			return RVT_Equal;
-
 		
+
 		Console::Write("Reve Results: ");
-		bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath);
+		bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath, syntactic_equivalent);
 		Console::WriteLine(llreveResult ? "equivalent" : "unknown");
 		if (llreveResult)
 			return LLREVE_Equal;
@@ -1247,22 +1316,24 @@ public:
 			Console::Write("\nNow solving SCC ", SCC_PREFIX, scc_index, " ");
 			vector<int> scc0 = dag0.get_SCC_line(scc_index);
 
-			if (dag0.is_doomed(scc_index))
-			{
+			// In the case the node is doomed but we can map it, we can assume it was doomed because it had a recursive son the we couldn't prove its equivalence. In that case we want to try and prove equivalence with LLREVE.
+			if (dag0.is_doomed(scc_index) && dag0.has_mapping_problem(scc_index))
+			{	
 				Console::WriteLine(": doomed");
-				for (size_t i = 0; i < scc0.size(); i++)  {
+				for (size_t i = 0; i < scc0.size(); i++) {
 					if (mapf0[scc0[i]] > 0)
 						report(scc0[i], false, names0, names1, Not_Equal);
 				}
 				continue;
 			}
-
-			vector<int> scc1 = dag1.get_SCC_line(mapm[scc_index]);
+			
+			vector<int> scc1 = dag1.get_SCC_line(mapm[scc_index]); 
 			DecompUtils::print_container(scc0);
 			if (!dag0.get_is_SCC_recursive(scc_index)) Console::Write(" -- non-recursive");
 			Console::WriteLine();
 
 			// if (m0,m0) \in mapm and one is recursive whereas the other is not, we doom the path.
+			/// TODO - CHAKED - We might want to run LLREVE here. 
 			if (dag0.get_is_SCC_recursive(scc_index) != dag1.get_is_SCC_recursive(mapm[scc_index]))
 			{
 				Console::Write("Side 0: S", scc_index);
@@ -1278,13 +1349,16 @@ public:
 
 			if (!dag0.get_is_SCC_recursive(scc_index))
 			{ // trivial MSSCs
+				int f0 = scc0[0];
 				S.clear(); // This is the only difference from the recursive case.
-				Equivalence_Status status = Check(scc0[0], S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath);
+				Equivalence_Status status = Check(f0, S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath);
 				if (status) {
-					mark_equivalent(scc0[0], status);
-					report(scc0[0], true, names0, names1,status);
+					mark_equivalent(f0, status);
+					dag0.mark_ancestors_as_undoomed(f0, true, true);
+					dag1.mark_ancestors_as_undoomed(mapf0[f0], true, false);
+					report(f0, true, names0, names1,status);
 				}
-				else report (scc0[0], false, names0, names1,status);
+				else report (f0, false, names0, names1,status);
 			}
 			else
 			{
@@ -1339,6 +1413,8 @@ public:
 				else
 					FORINT (vector, it, S) {
 					mark_equivalent(*it, ok_flag);
+					dag0.mark_ancestors_as_undoomed(*it, true, true);
+					dag1.mark_ancestors_as_undoomed(mapf0[*it], true, false);
 					report(*it, true, names0, names1,ok_flag);
 				}
 			}
@@ -1694,7 +1770,7 @@ void RVT_Decompose::Decompose_main( unsigned int CG0_SIZE, unsigned int CG1_SIZE
 	sl.set_dag0_size(dag0.size());
 	while (sl.build_SCC_map(dag0, dag1)) ; // builds map while removing doomed, until fixpoint.
     // TODO temporarely disabled due to assertion failures that I don’t understand.
-	// TODO: above was written by moritz. it was taken care by then, remove it soon when i finish. -chaked
+	// TODO - CHAKED: above was written by moritz. it was taken care by then, remove it soon when i finish.
 	if (!sl.is_map_consistent(dag0, dag1))
 		fatal_error("main(): SCC mapping is cyclic.");
 	sl.declare_syntactic_equivalent(syntactic_equivalent_list);
