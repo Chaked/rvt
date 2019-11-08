@@ -540,8 +540,14 @@ public:
 		if (side0) Console::Write("Side 0:");
 		else Console::Write("Side 1:");
 		Console::WriteLine("SCC ", SCC_PREFIX, i, " is undoomed now.");
-		FORINT(list, ancestor, getParents(i))
-			mark_ancestors_as_undoomed(*ancestor, true, side0);
+		FORINT(list, ancestor, getParents(i)){
+			bool all_children_are_undoomed = true;
+			FORINT(list, child, getChildren(*ancestor))
+				if (is_doomed(*child))
+					all_children_are_undoomed = false;
+			if (all_children_are_undoomed)
+				mark_ancestors_as_undoomed(*ancestor, true, side0);
+		}
 	}
 
     // With llreve there is no need to mark all ancestors as doomed, we thus only mark them as potentially doomed
