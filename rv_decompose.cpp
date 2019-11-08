@@ -813,7 +813,7 @@ public:
 		mapf1[j] = i;
 	}
 
-	bool build_SCC_map(DAG& dag0, DAG& dag1)
+	bool build_SCC_map(DAG& dag0, DAG& dag1, std::set<int>& changed_SCCs0, std::set<int>& changed_SCCs1)
 	{
 		++iteration;
 		Console::WriteLine("Building_SCC_map, iteration ", iteration);
@@ -831,8 +831,21 @@ public:
 				int m0 = dag0.get_map_element(i), // get_map_element uses 'map' - a mapping from functions to SCCs
 					m1 = dag1.get_map_element(mapf0[i]);
 				if (m0 < 0 || m1 < 0) continue;
-				if (!dag0.is_doomed(m0) && !dag1.is_doomed(m1)) a.set(m0, m1, true);
+				//Chaked 04.09.2019 - I have removed this condition because we want to allow mapping for doomed nodes.
+				//If a Node is doomed here it is due to mapping problem generated from the loops bellow.
+				//if (!dag0.is_doomed(m0) && !dag1.is_doomed(m1)) a.set(m0, m1, true);
+				a.set(m0, m1, true);
 			}
+
+		//Chaked - delete this, was temporary only. It prints a.
+		string bla = "";
+		for (int j = 0; j < dag0.size(); ++j) {
+			for (int i = 0; i < dag1.size(); ++i) {
+				bla += "|";
+				bla += a.get(j, i);
+			}
+			bla += "\n";
+		}
 
 		// examining result: vertical (dag1)
 		vector<bool> dag1_matches(dag1.size(), false);
@@ -847,13 +860,16 @@ public:
 					dag1.set_mapping_problem(j, true);
 				}
 			}
-			if (dag1.is_doomed(j)) {
-				// If we are here it means that one of our sons has a mapping problem.
+			/*if (dag1.is_doomed(j)) {
+				// Chaked - If we are here it means that one of our sons has a mapping problem.
 				// At this point we choose not to deal with it altought it might be possible.
-				// Therefor we set it as it has mapping problems as well but that's not necessary true. 
+				// Therefor we set it as it has mapping problems as well but that's not necessarily true. 
+				//Chaked - 30.08.2019: Is the above right? It might be doomed for several reasons.
+				// 1) We have entered the if() above us and this is a non recurssive unmapped function.
+				// 2) We have found an unmapped function and marked its ancestors as doomed. Hence the above is right.
 				dag1.set_mapping_problem(j, true);
 				continue;
-			}
+			}*/
 			mycount = 0;
 			for (int i = 0; i < dag0.size(); ++i) if (a.get(i, j)) mycount++;
 			switch (mycount)
@@ -863,7 +879,10 @@ public:
 				//Moritz - dag1.mark_ancestors_as_potentially_doomed(j, true, false);
 				dag1.mark_ancestors_as_doomed(j, true, false);
 				dag1.set_mapping_problem(j, true);
-				changed = true;
+				if (changed_SCCs1.find(j) == changed_SCCs1.end()){//If this change is new
+					changed_SCCs1.insert(j);
+					changed = true;
+				}
 				break;
 			case 1:
 				dag1_matches[j] = true;
@@ -872,7 +891,10 @@ public:
 				Console::WriteLine("DAG 1: S", j, " is mapped to more than one SCC on side 0. Ancestors are doomed.");
 				dag1.mark_ancestors_as_doomed(j, true, false);
 				dag1.set_mapping_problem(j, true);
-				changed = true;
+				if (changed_SCCs1.find(j) == changed_SCCs1.end()) {//If this change is new
+					changed_SCCs1.insert(j);
+					changed = true;
+				}
 				break;
 			}
 		}
@@ -890,13 +912,13 @@ public:
 					dag0.set_mapping_problem(j,true);
 				}
 			}
-			if (dag0.is_doomed(j)) {
+			/*if (dag0.is_doomed(j)) {
 				// If we are here it means that one of our sons has a mapping problem.
 					// At this point we choose not to deal with it altought it might be possible.
 					// Therefor we set it as it has mapping problems as well but that's not necessary true. 
 				dag0.set_mapping_problem(j, true);
 				continue;
-			}
+			}*/
 
 			mycount = 0;
 			for (int i = 0; i < dag1.size(); ++i) if (a.get(j, i)) ++mycount;
@@ -908,7 +930,10 @@ public:
 				//Moritz - dag0.mark_ancestors_as_potentially_doomed(j, true, true);
 				dag0.mark_ancestors_as_doomed(j, true, true);
 				dag0.set_mapping_problem(j, true);
-				changed = true;
+				if (changed_SCCs0.find(j) == changed_SCCs0.end()) {
+					changed_SCCs0.insert(j);
+					changed = true;
+				}
 				break;
 			case 1:
 			{
@@ -925,7 +950,10 @@ public:
 					Console::WriteLine("can only be mapped to DAG 1: S", to, ", which is doomed. Hence ancestors are doomed.");
 					dag0.mark_ancestors_as_doomed(j, true, true);
 					dag0.set_mapping_problem(j, true);
-					changed = true;
+					if (changed_SCCs0.find(j) == changed_SCCs0.end()) {
+						changed_SCCs0.insert(j);
+						changed = true;
+					}
 				}
 				break;
 			}
@@ -933,7 +961,10 @@ public:
 				Console::WriteLine("is mapped to more than one SCC on side 1! ancestors are doomed.");
 				dag0.mark_ancestors_as_doomed(j, true, true);
 				dag0.set_mapping_problem(j, true);
-				changed = true;
+				if (changed_SCCs0.find(j) == changed_SCCs0.end()) {
+					changed_SCCs0.insert(j);
+					changed = true;
+				}
 				break;
 			}
 		}
@@ -1316,7 +1347,7 @@ public:
 			Console::Write("\nNow solving SCC ", SCC_PREFIX, scc_index, " ");
 			vector<int> scc0 = dag0.get_SCC_line(scc_index);
 
-			// In the case the node is doomed but we can map it, we can assume it was doomed because it had a recursive son the we couldn't prove its equivalence. In that case we want to try and prove equivalence with LLREVE.
+			// In the case the node is doomed and we can't map it there is nothing for us to do. But if we can map it, we can assume it was doomed because it had a recursive son that we couldn't prove its equivalence. In that case we want to try and prove equivalence with LLREVE. 
 			if (dag0.is_doomed(scc_index) && dag0.has_mapping_problem(scc_index))
 			{	
 				Console::WriteLine(": doomed");
@@ -1418,7 +1449,6 @@ public:
 					report(*it, true, names0, names1,ok_flag);
 				}
 			}
-
 		}
 	}
 
@@ -1768,9 +1798,11 @@ void RVT_Decompose::Decompose_main( unsigned int CG0_SIZE, unsigned int CG1_SIZE
 	dag0.build_DAG(); dag1.build_DAG();
 	dag0.todotty("dag0");  dag1.todotty("dag1");
 	sl.set_dag0_size(dag0.size());
-	while (sl.build_SCC_map(dag0, dag1)) ; // builds map while removing doomed, until fixpoint.
+	std::set<int> changed_SCCs0 = std::set<int>();
+	std::set<int> changed_SCCs1 = std::set<int>();
+	while (sl.build_SCC_map(dag0, dag1,changed_SCCs0, changed_SCCs1)) ; // builds map while removing doomed, until fixpoint.
     // TODO temporarely disabled due to assertion failures that I don’t understand.
-	// TODO - CHAKED: above was written by moritz. it was taken care by then, remove it soon when i finish.
+	// TODO - CHAKED: above was written by moritz. it was taken care by then, remove that comment as soon as I finish.
 	if (!sl.is_map_consistent(dag0, dag1))
 		fatal_error("main(): SCC mapping is cyclic.");
 	sl.declare_syntactic_equivalent(syntactic_equivalent_list);
