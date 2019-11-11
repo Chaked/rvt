@@ -76,7 +76,7 @@ static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>
             if (equalName.find("rv_mult") != string::npos) {
                 continue;
             }
-            llreveCommand << " --assume-equivalent=" << equalName << "," << equalName;
+            //llreveCommand << " --assume-equivalent=" << equalName << "," << equalName;
         }
     }
     rv_errstrm << "\nEXECUTING " << llreveCommand.str() << "\n\n";
@@ -515,7 +515,7 @@ public:
 	/// <param name="side0"> side 0 or 1 </param>
 	void mark_ancestors_as_doomed(int i, bool mark, bool side0)
 	{
-		if (is_doomed(i)) return;
+		if (is_doomed(i)) return;// We doomed its ancestors when we doomed 'i' the first time.
 		if (mark) set_doomed(i, true);
 		if (side0) Console::Write("Side 0:");
 		else Console::Write("Side 1:");
@@ -529,13 +529,24 @@ public:
 	/// Marks ancestors as undoomed. With adding LLREVE there is a case where a node is doomed
 	/// but then LLREVE was able to prove equivalence for an accestor and then we need to change
 	/// the doom notion to all its ancestors.
+	/// </summary> - OLD 11.11.2019
+	///<summary>
+	/// Marks father as undoomed. With adding LLREVE there is a case where a node is doomed
+	/// but LLREVE was able to prove equivalence for it. If so, his father may be a potential
+	/// candidate for RVT. The reason we don't undoom all the ancestors is that some of them
+	/// might be doomed because another function in its tree. Lets look at this example:
+	/// f0 calls g0 calls h0 and f1 calls g1 calls h1 with this mapping: {(f0,f1), (h0,h1)}.
+	/// LEt us assume that h0, h1, g0 and g1 are all recurssive. g0 will start the execution as
+	/// doomed and so does f0 since g0 is a recurssive unmapped function and f0 calls it.
+	/// Now let us assume that RVT or REVE succedded proving equivalence for (h0,h1). It doesn't
+	/// make any sense to undoom f0 because its cause of doomness stayed unchanged.
 	/// </summary>
 	/// <param name="i">root</param>
 	/// <param name="mark">whether to mark the root itself as undoom. Generally yes other than the case in which the root was checked. </param>
 	/// <param name="side0"> side 0 or 1 </param>
 	void mark_ancestors_as_undoomed(int i, bool mark, bool side0)
 	{
-		if (!is_doomed(i)) return;
+		//if (!is_doomed(i)) return; 
 		if (mark && !has_mapping_problem(i)) set_doomed(i, false);
 		if (side0) Console::Write("Side 0:");
 		else Console::Write("Side 1:");
@@ -546,7 +557,7 @@ public:
 				if (is_doomed(*child))
 					all_children_are_undoomed = false;
 			if (all_children_are_undoomed)
-				mark_ancestors_as_undoomed(*ancestor, true, side0);
+				if (mark && !has_mapping_problem(*ancestor)) set_doomed(*ancestor, false);
 		}
 	}
 
@@ -1258,12 +1269,13 @@ public:
 		return Not_Equal;
 	}
 
-	Equivalence_Status Check(int f0, const vector<int>& S, const DAG& dag0, const DAG& dag1, std::string side0_fpath, std::string side1_fpath) const
+	Equivalence_Status Check(int f0,int scc_index, const vector<int>& S, const DAG& dag0, const DAG& dag1, std::string side0_fpath, std::string side1_fpath) const
 	{
 
-		if (dag0.is_doomed(f0) && !dag0.has_mapping_problem(f0))
+		if (dag0.is_doomed(scc_index)) {// If RVT can't check this, lets invoke LLREVE.
+			assert(!dag0.has_mapping_problem(scc_index)); // If we are here, f0 should be mapped.
 			return check_for_doomed(f0, S, dag0, dag1, side0_fpath, side1_fpath);
-		
+		}
 
 		RVSemChecker semchecker(m_semchecker);
 		Console::WriteLine("Check (", f0, ",", mapf0[f0], ")");
@@ -1388,11 +1400,11 @@ public:
 			{ // trivial MSSCs
 				int f0 = scc0[0];
 				S.clear(); // This is the only difference from the recursive case.
-				Equivalence_Status status = Check(f0, S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath);
+				Equivalence_Status status = Check(f0,scc_index, S, dag0, dag1/*, cg0, cg1*/, side0_fpath, side1_fpath);
 				if (status) {
 					mark_equivalent(f0, status);
-					dag0.mark_ancestors_as_undoomed(f0, true, true);
-					dag1.mark_ancestors_as_undoomed(mapf0[f0], true, false);
+					dag0.mark_ancestors_as_undoomed(scc_index, true, true);
+					dag1.mark_ancestors_as_undoomed(mapm[scc_index], true, false);
 					report(f0, true, names0, names1,status);
 				}
 				else report (f0, false, names0, names1,status);
@@ -1421,14 +1433,14 @@ public:
 							}
 							else
 							{
-								ok_flag = Check(S[i], S, dag0, dag1, side0_fpath, side1_fpath);
+								ok_flag = Check(S[i],scc_index, S, dag0, dag1, side0_fpath, side1_fpath);
 								if (ok_flag) {
 									save_solutions[S[i]].resize(S.size());
 									save_solutions[S[i]].assign(S.begin(), S.end());
 								}
 							}
 						}
-						else ok_flag = Check(S[i], S, dag0, dag1, side0_fpath, side1_fpath);
+						else ok_flag = Check(S[i],scc_index, S, dag0, dag1, side0_fpath, side1_fpath);
 						if (!ok_flag)
 						{
 							failing_node = S[i];
@@ -1447,12 +1459,13 @@ public:
 					dag1.mark_ancestors_as_doomed(mapm[scc_index], false, false);
 				}
 				//  for all <f,g> \in S mark <f,g> as "equivalent"
-				else
-					FORINT (vector, it, S) {
-					mark_equivalent(*it, ok_flag);
-					dag0.mark_ancestors_as_undoomed(*it, true, true);
-					dag1.mark_ancestors_as_undoomed(mapf0[*it], true, false);
-					report(*it, true, names0, names1,ok_flag);
+				else {
+					dag0.mark_ancestors_as_undoomed(scc_index, true, true);
+					dag1.mark_ancestors_as_undoomed(mapm[scc_index], true, false);
+					FORINT(vector, it, S) {
+						mark_equivalent(*it, ok_flag);
+						report(*it, true, names0, names1, ok_flag);
+					}
 				}
 			}
 		}
