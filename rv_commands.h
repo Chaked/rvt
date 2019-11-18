@@ -34,7 +34,8 @@ class RVCommands
 			       const std::string& arg3 = NO_ARG,
 			       const std::string& arg4 = NO_ARG,
 			       const std::string& arg5 = NO_ARG,
-			       const std::string& arg6 = NO_ARG);
+			       const std::string& arg6 = NO_ARG,
+				   const bool isPython = false);
 
 	std::string unixStylePath(const std::string &path) const;
 	std::string unsafeCygpath(const std::string &path) const;
@@ -63,6 +64,8 @@ class RVCommands
 
 	bool run_outline_mod(const std::string& fname);
 	int  run_minisat(const std::string& opbFile, const std::string& assignmentFile);
+
+	int run_change_fun_name(const int script_command, const std::string& filePath0, const std::string& filePath1, const std::string& funName0 = NO_ARG, const std::string& funName1 = NO_ARG);
 
 	ResCode get_result(void);
 

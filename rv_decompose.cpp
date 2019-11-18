@@ -39,60 +39,6 @@ static const char *RV_DOTTY_FILE = "rv_out.gv";
 
 enum Equivalence_Status {Not_Equal, RVT_Equal, LLREVE_Equal, Syntactic_Equal};
 
-static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>& is_equivalent, const std::vector<Equivalence_Status>& is_equivalent0, std::string filePath1, std::string filePath2, const vector<bool>& syntactic_equivalent) {
-    RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
-
-    assert(pfp != nullptr);
-    std::string functionName = pfp->name;
-    if (RVLoop::is_loop_name(functionName, RVSide(0))) {
-        // llreve operates on the original source instead of
-        // the one where loop transformations have taken place.
-        // We thus have to ignore functions created by that transformation.
-        return false;
-    }
-
-    // Strip the suffix because we want to access the original, untransformed files
-    size_t recSuffixLength = strlen(RV_LOOPS_TO_REC_EXT);
-    assert(filePath1.compare(filePath1.length() - recSuffixLength - 1,
-                             string::npos, RV_LOOPS_TO_REC_EXT));
-    assert(filePath2.compare(filePath2.length() - recSuffixLength - 1,
-                             string::npos, RV_LOOPS_TO_REC_EXT));
-    filePath1 = filePath1.substr(0, filePath1.length() - recSuffixLength);
-    filePath2 = filePath2.substr(0, filePath2.length() - recSuffixLength);
-
-    std::array<char, 128> buffer;
-    std::string llreveOutput;
-    // TODO pass the correct function and assume equivalents here
-    ostringstream llreveCommand;
-    llreveCommand << "llreve.py -z3 " << filePath1 << " " << filePath2
-                  << " -infer-marks -fun " << functionName;
-    for (size_t i = 0; i < is_equivalent.size(); ++i) {
-        if (is_equivalent[i]/* && !syntactic_equivalent[i]*/) {
-            RVFuncPair* pfp = rv_ufs.getFuncPairById(i, 0, true);
-            std::string equalName = pfp->name;
-            if (RVLoop::is_loop_name(equalName, RVSide(0))) {
-                continue;
-            }
-            if (equalName.find("rv_mult") != string::npos) {
-                continue;
-            }
-            //llreveCommand << " --assume-equivalent=" << equalName << "," << equalName;
-        }
-    }
-    rv_errstrm << "\nEXECUTING " << llreveCommand.str() << "\n\n";
-	std::string forDebugPurpose = llreveCommand.str();
-    std::unique_ptr<FILE, std::function<int(FILE*)>>
-        pipe(popen(llreveCommand.str().c_str(), "r"),
-             pclose);
-	
-    while (!feof(pipe.get())) {
-        if (fgets(buffer.data(), 128, pipe.get()) != NULL)
-            llreveOutput += buffer.data();
-    }
-    rv_errstrm << "REVE RESULT: " << llreveOutput;
-    return llreveOutput == "EQUAL\n";
-}
-
 class Console {
 public:
 	static void Write(const string &s);
@@ -515,13 +461,19 @@ public:
 	/// <param name="side0"> side 0 or 1 </param>
 	void mark_ancestors_as_doomed(int i, bool mark, bool side0)
 	{
-		if (is_doomed(i)) return;// We doomed its ancestors when we doomed 'i' the first time.
+		//if (is_doomed(i)) return;// We doomed its ancestors when we doomed 'i' the first time.
 		if (mark) set_doomed(i, true);
 		if (side0) Console::Write("Side 0:");
 		else Console::Write("Side 1:");
 		Console::WriteLine("SCC ", SCC_PREFIX, i, " is doomed.");
-		FORINT(list, ancestor, getParents(i))
-		    mark_ancestors_as_doomed(*ancestor, true, side0);
+		FORINT(list, ancestor, getParents(i)) {
+			set_doomed(*ancestor, true);
+			//There are cases where the SCC is not recursive but it has an unequivalent 
+			//recursive desendant 
+			if(!get_is_SCC_recursive(*ancestor))
+				mark_ancestors_as_doomed(*ancestor, true, side0);
+		}
+			
 	}
 
 
@@ -1346,6 +1298,72 @@ public:
 		//Not_Equal
 		return "";
 	}
+
+
+	static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>& is_equivalent, const std::vector<Equivalence_Status>& is_equivalent0, std::string filePath1, std::string filePath2, const vector<bool>& syntactic_equivalent) {
+		RVFuncPair* pfp = rv_ufs.getFuncPairById(functionIndex, 0, true);
+
+		assert(pfp != nullptr);
+		std::string functionName = pfp->name;
+		if (RVLoop::is_loop_name(functionName, RVSide(0))) {
+			// llreve operates on the original source instead of
+			// the one where loop transformations have taken place.
+			// We thus have to ignore functions created by that transformation.
+			return false;
+		}
+
+		// Strip the suffix because we want to access the original, untransformed files
+		size_t recSuffixLength = strlen(RV_LOOPS_TO_REC_EXT);
+		assert(filePath1.compare(filePath1.length() - recSuffixLength - 1,
+			string::npos, RV_LOOPS_TO_REC_EXT));
+		assert(filePath2.compare(filePath2.length() - recSuffixLength - 1,
+			string::npos, RV_LOOPS_TO_REC_EXT));
+		filePath1 = filePath1.substr(0, filePath1.length() - recSuffixLength);
+		filePath2 = filePath2.substr(0, filePath2.length() - recSuffixLength);
+
+		std::array<char, 128> buffer;
+		std::string llreveOutput;
+
+		//ostringstream prellrevecommand;
+		//prellrevecommand << "../tools/scripts/change_fun_name.py" << " -create " << filePath1 << " " << filePath2 << " "
+		//	<< pfp->side_name[0] << " " << pfp->side_name[1];
+		//Console::WriteLine("Executing: " + prellrevecommand.str());
+
+
+		rv_commands.run_change_fun_name(0, filePath1,filePath2, pfp->side_name[0], pfp->side_name[1]);
+
+		ostringstream llreveCommand;
+	    llreveCommand << "llreve.py -z3 " << filePath1 << "temp " << filePath2
+	                  << "temp -infer-marks "/*-fun " << functionName*/;
+	    for (size_t i = 0; i < is_equivalent.size(); ++i) {
+	        if (is_equivalent[i]/* && !syntactic_equivalent[i]*/) {
+	            RVFuncPair* pfp = rv_ufs.getFuncPairById(i, 0, true);
+	            std::string equalName = pfp->name;
+	            if (RVLoop::is_loop_name(equalName, RVSide(0))) {
+	                continue;
+	            }
+	            if (equalName.find("rv_mult") != string::npos) {
+	                continue;
+	            }
+	            //llreveCommand << " --assume-equivalent=" << equalName << "," << equalName;
+	        }
+	    }
+	    rv_errstrm << "\nEXECUTING " << llreveCommand.str() << "\n\n";
+	    std::unique_ptr<FILE, std::function<int(FILE*)>>
+	        pipe(popen(llreveCommand.str().c_str(), "r"),
+	             pclose);
+
+		while (!feof(pipe.get())) {
+	        if (fgets(buffer.data(), 128, pipe.get()) != NULL)
+	            llreveOutput += buffer.data();
+	    }
+	    rv_errstrm << "REVE RESULT: " << llreveOutput;		
+
+		rv_commands.run_change_fun_name(1, filePath1, filePath2);
+
+		return llreveOutput == "EQUAL\n";
+	}
+
 
 	void report (int f, bool result, const vector<string>& names0, const vector<string>& names1, Equivalence_Status status) {
 		endl(rv_errstrm << "( " << names0.at(f) << ", " << names1.at(mapf0[f]) << " ) : "

@@ -103,11 +103,12 @@ int RVCommands::runScript(const std::string& script,
 						  const std::string& arg3,
 						  const std::string& arg4,
 						  const std::string& arg5,
-						  const std::string& arg6)
+						  const std::string& arg6,
+						  const bool isPython)
 // for scripts only (this is why we need the tcsh in Windows)
 {
 	static const RVRelativePath ScriptsLocation(3, "..", "tools", "scripts");
-	std::string cmd(ScriptsLocation.combineRelativePath(script));
+	std::string cmd((isPython? "python " : "" ) + ScriptsLocation.combineRelativePath(script));
 
 	if (arg1 != NO_ARG) {
 		cmd.append(" ").append(arg1);
@@ -339,6 +340,18 @@ bool RVCommands::run_sem_check( const std::string& dir,
 
 int RVCommands::run_minisat(const string& opbFile, const string& assignmentFile) {
     return runScript("rv_minisat", unixStylePath(opbFile), unixStylePath(assignmentFile));
+}
+
+int RVCommands::run_change_fun_name(const int script_command, const std::string& filePath0, const std::string& filePath1, const std::string& funName0, const std::string& funName1){
+	switch (script_command)
+	{
+	case 0:
+		return runScript("change_fun_name.py","-create", unixStylePath(filePath0), unixStylePath(filePath1), funName0, funName1,"",true);
+	case 1:
+		return runScript("change_fun_name.py", "-delete", unixStylePath(filePath0), unixStylePath(filePath1),"","","",true);
+	default:
+		return -1;
+	}
 }
 
 const std::string RVCommands::c99GccOption(bool c99) {
