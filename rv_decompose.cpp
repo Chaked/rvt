@@ -1330,22 +1330,26 @@ public:
 		//Console::WriteLine("Executing: " + prellrevecommand.str());
 
 
-		rv_commands.run_change_fun_name(0, filePath1,filePath2, pfp->side_name[0], pfp->side_name[1]);
+		//rv_commands.run_change_fun_name(0, filePath1,filePath2, pfp->side_name[0], pfp->side_name[1]);
+		//Gotta add the suffix "temp" to the files names to use the output of this in llrevecommand below.
 
 		ostringstream llreveCommand;
-	    llreveCommand << "llreve.py -z3 " << filePath1 << "temp " << filePath2
-	                  << "temp -infer-marks "/*-fun " << functionName*/;
+		llreveCommand << "llreve.py -z3 " << filePath1 << " " << filePath2;
+		if(functionName != "main") // Only god knows why LLREVE fails if it get "-fun main" but succeed without it 
+			llreveCommand << " -fun " << functionName;
 	    for (size_t i = 0; i < is_equivalent.size(); ++i) {
-	        if (is_equivalent[i]/* && !syntactic_equivalent[i]*/) {
+	        if (is_equivalent[i]) {
 	            RVFuncPair* pfp = rv_ufs.getFuncPairById(i, 0, true);
 	            std::string equalName = pfp->name;
 	            if (RVLoop::is_loop_name(equalName, RVSide(0))) {
 	                continue;
 	            }
-	            if (equalName.find("rv_mult") != string::npos) {
+	            if (equalName.find("rv_mult") != string::npos || 
+					equalName.find("rv_div") != string::npos ||
+					equalName.find("rv_mod") != string::npos) {
 	                continue;
 	            }
-	            //llreveCommand << " --assume-equivalent=" << equalName << "," << equalName;
+	            llreveCommand << " --assume-equivalent=" << pfp->side_name[0] << "," << pfp->side_name[1];
 	        }
 	    }
 	    rv_errstrm << "\nEXECUTING " << llreveCommand.str() << "\n\n";
@@ -1359,7 +1363,7 @@ public:
 	    }
 	    rv_errstrm << "REVE RESULT: " << llreveOutput;		
 
-		rv_commands.run_change_fun_name(1, filePath1, filePath2);
+		//rv_commands.run_change_fun_name(1, filePath1, filePath2);
 
 		return llreveOutput == "EQUAL\n";
 	}
