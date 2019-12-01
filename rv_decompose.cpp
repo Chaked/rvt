@@ -825,8 +825,10 @@ public:
 			{
 				int f = dag1.get_SCC_line(j).front();
 				if (!is_mapped1(f)) {
+					// If a not-recursive node can't be map we note it as doomed and move on to the next node.
 					dag1.set_doomed(j, true);
 					dag1.set_mapping_problem(j, true);
+					continue;
 				}
 			}
 			/*if (dag1.is_doomed(j)) {
@@ -877,8 +879,10 @@ public:
 			{
 				int f = dag0.get_SCC_line(j).front();
 				if (!is_mapped(f)) {
+					// If a not-recursive node can't be map we note it as doomed and move on to the next node.
 					dag0.set_doomed(j, true);
 					dag0.set_mapping_problem(j,true);
+					continue;
 				}
 			}
 			/*if (dag0.is_doomed(j)) {
@@ -1324,17 +1328,8 @@ public:
 		std::array<char, 128> buffer;
 		std::string llreveOutput;
 
-		//ostringstream prellrevecommand;
-		//prellrevecommand << "../tools/scripts/change_fun_name.py" << " -create " << filePath1 << " " << filePath2 << " "
-		//	<< pfp->side_name[0] << " " << pfp->side_name[1];
-		//Console::WriteLine("Executing: " + prellrevecommand.str());
-
-
-		//rv_commands.run_change_fun_name(0, filePath1,filePath2, pfp->side_name[0], pfp->side_name[1]);
-		//Gotta add the suffix "temp" to the files names to use the output of this in llrevecommand below.
-
 		ostringstream llreveCommand;
-		llreveCommand << "llreve.py -z3 " << filePath1 << " " << filePath2;
+		llreveCommand << "llreve.py -z3 " << filePath1 << " " << filePath2 << " -infer-marks";
 		if(functionName != "main") // Only god knows why LLREVE fails if it get "-fun main" but succeed without it 
 			llreveCommand << " -fun " << functionName;
 	    for (size_t i = 0; i < is_equivalent.size(); ++i) {
@@ -1362,8 +1357,6 @@ public:
 	            llreveOutput += buffer.data();
 	    }
 	    rv_errstrm << "REVE RESULT: " << llreveOutput;		
-
-		//rv_commands.run_change_fun_name(1, filePath1, filePath2);
 
 		return llreveOutput == "EQUAL\n";
 	}
@@ -1842,8 +1835,6 @@ void RVT_Decompose::Decompose_main( unsigned int CG0_SIZE, unsigned int CG1_SIZE
 	std::set<int> changed_SCCs0 = std::set<int>();
 	std::set<int> changed_SCCs1 = std::set<int>();
 	while (sl.build_SCC_map(dag0, dag1,changed_SCCs0, changed_SCCs1)) ; // builds map while removing doomed, until fixpoint.
-    // TODO temporarely disabled due to assertion failures that I don’t understand.
-	// TODO - CHAKED: above was written by moritz. it was taken care by then, remove that comment as soon as I finish.
 	if (!sl.is_map_consistent(dag0, dag1))
 		fatal_error("main(): SCC mapping is cyclic.");
 	sl.declare_syntactic_equivalent(syntactic_equivalent_list);
