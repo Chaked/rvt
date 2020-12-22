@@ -5,13 +5,13 @@
         "generator": "Unix Makefiles",
         "remoteMachineName": "${defaultRemoteMachineName}",
         "configurationType": "Debug",
-        "remoteCMakeListsRoot": "/var/tmp/src/${workspaceHash}/${name}",
+        "remoteCMakeListsRoot": "/var/tmp/src/rvt/${name}",
         /*"cmakeExecutable": "/usr/bin/cmake",*/
         "cmakeExecutable": "/usr/local/bin/cmake",/* - use this on rvt.technion.ac.il*/
-        "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
-        "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
-        "remoteBuildRoot": "/var/tmp/src/${workspaceHash}/${name}/build",
-        "remoteInstallRoot": "/var/tmp/src/${workspaceHash}/install/${name}",
+        "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\rvt\\build\\${name}",
+        "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\rvt\\install\\${name}",
+        "remoteBuildRoot": "/var/tmp/src/rvt/${name}/build",
+        "remoteInstallRoot": "/var/tmp/src/rvt/install/${name}",
         "remoteCopySources": true,
         "remoteCopySourcesOutputVerbosity": "Normal",
         "remoteCopySourcesConcurrentCopies": "10",

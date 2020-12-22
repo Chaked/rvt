@@ -5,7 +5,7 @@
     return a*a;
   }
 
-   double abs(double x){
+   double _abs(double x){
     return x > 0 ? (x) : -(x);
   }
 
@@ -45,7 +45,7 @@
       delx=(ave-xt)/ave;
       dely=(ave-yt)/ave;
       delz=(ave-zt)/ave;
-    } while (MAX(MAX(abs(delx),abs(dely)),abs(delz)) > ERRTOL);
+    } while (MAX(MAX(_abs(delx),_abs(dely)),_abs(delz)) > ERRTOL);
     e2=delx*dely-delz*delz;
     e3=delx*dely*delz;
     return (1.0+(C1*e2-C2-C3*e3)*e2+C4*e3)/sqrt(ave);
@@ -79,7 +79,7 @@
       delx=(ave-xt)/ave;
       dely=(ave-yt)/ave;
       delz=(ave-zt)/ave;
-    } while (MAX(MAX(abs(delx),abs(dely)),abs(delz)) > ERRTOL);
+    } while (MAX(MAX(_abs(delx),_abs(dely)),_abs(delz)) > ERRTOL);
     ea=delx*dely;
     eb=delz*delz;
     ec=ea-eb;
@@ -95,7 +95,7 @@
      double THIRD=1.0/3.0, C1=0.3, C2=1.0/7.0, C3=0.375, C4=9.0/22.0;
     double alamb,ave,s,w,xt,yt;
 
-    if (x < 0.0 || y == 0.0 || (x+abs(y)) < TINY || (x+abs(y)) > BIG ||
+    if (x < 0.0 || y == 0.0 || (x+_abs(y)) < TINY || (x+_abs(y)) > BIG ||
             (y<-COMP1 && x > 0.0 && x < COMP2))
      printf("invalid arguments in rc");
     if (y > 0.0) {
@@ -113,7 +113,7 @@
       yt=0.25*(yt+alamb);
       ave=THIRD*(xt+yt+yt);
       s=(yt-ave)/ave;
-    } while (abs(s) > ERRTOL);
+    } while (_abs(s) > ERRTOL);
     return w*(1.0+s*s*(C1+s*(C2+s*(C3+s*C4))))/sqrt(ave);
   }
 
@@ -158,7 +158,7 @@ double main (double x, double y, double z, double p) {
     double xt= 0;
     double yt= 0;
     double zt= 0;
-    if (MIN(MIN(x,y),z) < 0.0 || MIN(MIN(x+y,x+z),MIN(y+z,abs(p))) < TINY || MAX(MAX(x,y),MAX(z,abs(p))) > BIG)
+    if (MIN(MIN(x,y),z) < 0.0 || MIN(MIN(x+y,x+z),MIN(y+z,_abs(p))) < TINY || MAX(MAX(x,y),MAX(z,_abs(p))) > BIG)
           return -1000;
     sum=0.0;
     fac=1.0;
@@ -196,7 +196,7 @@ double main (double x, double y, double z, double p) {
       dely=(ave-yt)/ave;
       delz=(ave-zt)/ave;
       delp=(ave-pt)/ave;
-    } while (MAX(MAX(abs(delx),abs(dely)),MAX(abs(delz),abs(delp))) > ERRTOL);
+    } while (MAX(MAX(_abs(delx),_abs(dely)),MAX(_abs(delz),_abs(delp))) > ERRTOL);
     ea=delx*(dely+delz)+dely*delz;
     eb=delx*dely*delz;
     ec=delp*delp;
