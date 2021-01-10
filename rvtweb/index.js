@@ -74,6 +74,8 @@ function runRVT(socket, p1, p2, folderName, params){
 	var errText = '';
 	
 	const exec = require('child_process').exec;
+	const execSync = require('child_process').execSync;
+		
 	if (params.indexOf(MUTUAL_TERMINATION_PARAM) > -1){
 		
 		var moddedParams = params.replace('-mt', '');
@@ -107,7 +109,14 @@ function runRVT(socket, p1, p2, folderName, params){
 								fs.readFile(path.join(folderName, RESULT_FILE), 'utf8', 
 						  		function(err, data) {
 								  	if (err) throw err;
-									socket.emit('message', {out:stdout,graphs:data});
+									
+								rv_file_name = execSync('ls -t semchks/*.rv.c | head -1', {cwd: folderName}).toString();
+								winston.info(rv_file_name);
+								rv_file_content = execSync('cat '+rv_file_name, {cwd: folderName}).toString();
+								winston.info(rv_file_content);
+								socket.emit('message', {out:stdout,graphs:data,file_name: rv_file_name.split('/')[1],file_content: rv_file_content});
+								
+									
 									deleteFolder(folderName);
 								});
 						  });	  
@@ -137,10 +146,12 @@ function runRVT(socket, p1, p2, folderName, params){
 						  fs.readFile(path.join(folderName, RESULT_FILE), 'utf8', 
 						  	function(err, data) {
 							  	if (err) throw err;
-								//TODO: Add here a read to rv.c file, add it to 'data' and parse it in the frontend.
-							  	//This returns the latest .rv.c file : "ls -t *.rv.c | head -1" 
-								//socket.emit('message', data);
-								socket.emit('message', {out:stdout,graphs:data});
+								
+								rv_file_name = execSync('ls -t semchks/*.rv.c | head -1', {cwd: folderName}).toString();
+								winston.info(rv_file_name);
+								rv_file_content = execSync('cat '+rv_file_name, {cwd: folderName}).toString();
+								winston.info(rv_file_content);
+								socket.emit('message', {out:stdout,graphs:data,file_name: rv_file_name.split('/')[1],file_content: rv_file_content});
 									
 								deleteFolder(folderName);
 							});

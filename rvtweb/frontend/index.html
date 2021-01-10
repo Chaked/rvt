@@ -165,15 +165,24 @@
           </div>
       </div>
       <div id="stdout-frame" style="padding-left: 50px;">
-      <p>
-
-          <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-              Show stdout
-          </button>
-      </p>
-      <div class="collapse" id="collapseExample">
-          <div id="stdout" class="card card-body"></div>
+          <p>
+              <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseStdout" aria-expanded="false" aria-controls="collapseStdout">
+                  Show stdout
+              </button>
+          </p>
+          <div class="collapse" id="collapseStdout">
+              <div id="stdout" class="card card-body"></div>
+          </div>
       </div>
+      <div id="rv-file-frame" style="padding-left: 50px;">
+          <p>
+              <button id="rv-file-name" class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseFile" aria-expanded="false" aria-controls="collapseFile">
+              </button>
+          </p>
+          <div class="collapse" id="collapseFile">
+              <div  class="card card-body"><textarea id="rv-file" class="form-control"></textarea></div>
+
+          </div>
       </div>
 
       <!-- Le javascript
@@ -205,6 +214,11 @@
           lineNumbers: true
           } );
 
+          var rvc = CodeMirror.fromTextArea($('#rv-file')[0],
+          { value: "function myScript(){return 100;}\n",
+          name:  "C",
+          lineNumbers: true
+          } );
 
           var connectionProblems = false;
 
@@ -213,6 +227,7 @@
           $('#send-btn').attr("disabled", true);
           $('#error').hide();
           $('#stdout-frame').hide();
+          $('#rv-file-frame').hide();
           $('#output').hide();
           $('#legend').hide();
           };
@@ -282,6 +297,7 @@
 
           socket.on('connect', function(){
           $('#stdout-frame').hide();
+          $('#rv-file-frame').hide();
           if (connectionProblems){
           $('#error').hide();
           connectionProblems = false;
@@ -327,7 +343,10 @@
           console.log('message');
           $('#output').html(Viz(msg.graphs));
           $('#stdout').html(msg.out.replace(/\n/g, "<br />"));
+          $('#rv-file-name').html('Show '+msg.file_name);
+          rvc.setValue(msg.file_content);
           $('#stdout-frame').show();
+          $('#rv-file-frame').show();
           $('#output').show();
           $('#legend').show();
           stopLoadDisplay();
