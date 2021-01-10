@@ -107,7 +107,8 @@ function runRVT(socket, p1, p2, folderName, params){
 								fs.readFile(path.join(folderName, RESULT_FILE), 'utf8', 
 						  		function(err, data) {
 								  	if (err) throw err;
-								  	socket.emit('message', data);
+								  	socket.emit('message',data);
+									//socket.emit('message', '{"stdout":'+stdout ',"graph":'+data+'}');
 									deleteFolder(folderName);
 								});
 						  });	  
@@ -137,7 +138,9 @@ function runRVT(socket, p1, p2, folderName, params){
 						  fs.readFile(path.join(folderName, RESULT_FILE), 'utf8', 
 						  	function(err, data) {
 							  	if (err) throw err;
-							  	socket.emit('message', data);
+								//TODO: Add here a read to rv.c file, add it to 'data' and parse it in the frontend.
+							  	//This returns the latest .rv.c file : "ls -t *.rv.c | head -1" 
+								socket.emit('message', data);
 								deleteFolder(folderName);
 							});
 						  });
