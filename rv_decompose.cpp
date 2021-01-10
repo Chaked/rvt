@@ -642,7 +642,7 @@ void mygraph::todotty_final(ofstream& dotty,
 	static const string SyntacticEqualStyle = "color = \"blue\", "; // cannot be empty because after this text a comma is added
 	static const string NotSyntacticEqualStyle = " "; // peripheries = 2
 	static const string EqualStyleRVT = "style = \"filled\", fillcolor = \"green\"";
-	static const string EqualStyleReve = "style = \"filled\", fillcolor = \"chartreuse3\"";
+	static const string EqualStyleReve = "style = \"filled\", fillcolor = \"palegreen1\"";
 	static const string EqualStyleSyntactic = "style = \"filled\", fillcolor = \"cadetblue1\"";
 	static const string NotEqualStyle = "style = \"filled\", fillcolor = \"white\"";
 	static const string MutTermStyle = "shape = \"octagon\", ";

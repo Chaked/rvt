@@ -111,10 +111,9 @@ function runRVT(socket, p1, p2, folderName, params){
 								  	if (err) throw err;
 									
 								rv_file_name = execSync('ls -t semchks/*.rv.c | head -1', {cwd: folderName}).toString();
-								winston.info(rv_file_name);
 								rv_file_content = execSync('cat '+rv_file_name, {cwd: folderName}).toString();
-								winston.info(rv_file_content);
-								socket.emit('message', {out:stdout,graphs:data,file_name: rv_file_name.split('/')[1],file_content: rv_file_content});
+								var log = stdout+'\nSecond Channel\n\n'+stderr;
+								socket.emit('message', {out:log,graphs:data,file_name: rv_file_name.split('/')[1],file_content: rv_file_content});
 								
 									
 									deleteFolder(folderName);
@@ -148,10 +147,9 @@ function runRVT(socket, p1, p2, folderName, params){
 							  	if (err) throw err;
 								
 								rv_file_name = execSync('ls -t semchks/*.rv.c | head -1', {cwd: folderName}).toString();
-								winston.info(rv_file_name);
 								rv_file_content = execSync('cat '+rv_file_name, {cwd: folderName}).toString();
-								winston.info(rv_file_content);
-								socket.emit('message', {out:stdout,graphs:data,file_name: rv_file_name.split('/')[1],file_content: rv_file_content});
+								var log = stdout+'\nSecond Channel\n\n'+stderr;
+								socket.emit('message', {out:log,graphs:data,file_name: rv_file_name.split('/')[1],file_content: rv_file_content});
 									
 								deleteFolder(folderName);
 							});
