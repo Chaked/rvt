@@ -27,6 +27,10 @@ class RVMain
   private:
 	RVBoolStatus abandone_output(int f0_id);
 
+  public:
+	bool disable_rvt_semantic_check;
+	bool disable_reve_semantic_check;
+
   protected:
 	static const std::string UNINITED;
 	std::string base_dir;
@@ -43,7 +47,7 @@ class RVMain
 	int side0_unwind, side1_unwind;
 	bool seperate_basecase_proof;
 	int basecase_unwind_threshold;
-
+	
 	int delta_dk;
 	int semchk_timeout;
 

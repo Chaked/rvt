@@ -1217,7 +1217,7 @@ public:
 		Console::WriteLine("Check when doomed (", f0, ",", mapf0[f0], ")");
 		
 		Console::Write("Reve Results: ");
-		bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath, syntactic_equivalent);
+		bool llreveResult = m_semchecker.disable_reve_semantic_check? false : checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath, syntactic_equivalent);
 		Console::WriteLine(llreveResult ? "equivalent" : "unknown");
 		if (llreveResult)
 			return LLREVE_Equal;
@@ -1270,14 +1270,15 @@ public:
 		Console::WriteLine("Semantic equivalence check:");
 		Console::WriteLine("RVT Results: ");
 		Console::WriteLine("-*-*-*-*-*-*-*  In  -*-*-*-*-*-*-*-*-*-*-");
-		RVCommands::ResCode rvtResult = semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
+		RVCommands::ResCode rvtResult = m_semchecker.disable_rvt_semantic_check? RVCommands::FAIL :semchecker.check_semantic_equivalence(f0, uf, side0_fpath, side1_fpath);  // !!
 		Console::WriteLine("-*-*-*-*-*-*-*  Out -*-*-*-*-*-*-*-*-*-*-");
 		if (rvtResult == RVCommands::SUCCESS)
 			return RVT_Equal;
 		
 
 		Console::Write("Reve Results: ");
-		bool llreveResult = checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath, syntactic_equivalent);
+		bool llreveResult = 
+		m_semchecker.disable_reve_semantic_check ? false: checkLlreve(f0, is_equivalent0, is_equivalent1, side0_fpath, side1_fpath, syntactic_equivalent);
 		Console::WriteLine(llreveResult ? "equivalent" : "unknown");
 		if (llreveResult)
 			return LLREVE_Equal;
@@ -1302,6 +1303,7 @@ public:
 		//Not_Equal
 		return "";
 	}
+
 
 
 	static bool checkLlreve(int functionIndex, const std::vector<Equivalence_Status>& is_equivalent, const std::vector<Equivalence_Status>& is_equivalent0, std::string filePath1, std::string filePath2, const vector<bool>& syntactic_equivalent) {
@@ -1347,6 +1349,7 @@ public:
 	            llreveCommand << " --assume-equivalent=" << pfp->side_name[0] << "," << pfp->side_name[1];
 	        }
 	    }
+
 	    rv_errstrm << "\nEXECUTING " << llreveCommand.str() << "\n\n";
 	    std::unique_ptr<FILE, std::function<int(FILE*)>>
 	        pipe(popen(llreveCommand.str().c_str(), "r"),
@@ -1356,6 +1359,9 @@ public:
 	        if (fgets(buffer.data(), 128, pipe.get()) != NULL)
 	            llreveOutput += buffer.data();
 	    }
+
+		
+
 	    rv_errstrm << "REVE RESULT: " << llreveOutput;		
 
 		return llreveOutput == "EQUAL\n";

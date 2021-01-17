@@ -42,7 +42,9 @@ RV_LOC_MSGS_ENG_BEGIN
 	//	"  -lb <num>         Number of calls the UFs will look back to compare inputs (default=1)\n"
 	//	"  -r  <num>         Number of records in channels and UF value arrays (default=32)\n"
         "  -unroll <num1> <num2> Whether unrolling should be performed. The two integers represent the amount of rolling required on each side\n"
-		"  -sprtbase <op num>	 Perform seperate proofs for the base case and for the step. The number is optional.\n" 
+		"  -sprtbase <op num>	 Perform seperate proofs for the base case and for the step. The number is optional.\n"
+		" -norvt Do not apply RVT semantic check\n"
+		" -nereve Do not apply REVE semantic check\n"
 		"  -timeout <seconds> Timeout for semchk execution\n"
 		"  -mt               Check mutual termination\n"
 	//	"  -completeness <#> Completeness level (0 - 2). Default is 0. "
@@ -191,6 +193,8 @@ bool RVOptions::parse_options(int argc, char* const argv[])
   seperate_basecase_proof = false;
   unitrv = false;
   frama = false;
+  disable_reve_semantic_check = false;
+  disable_rvt_semantic_check = false;
   if( argc < 3 )
 	return false;
 
@@ -386,6 +390,12 @@ bool RVOptions::parse_options(int argc, char* const argv[])
 	}
 	else if (!strcmp(argv[i], "-val")) {
 		frama = true;
+	}
+	else if (!strcmp(argv[i], "-norvt")) {
+		disable_rvt_semantic_check = true;
+	}
+	else if (!strcmp(argv[i], "-noreve")) {
+		disable_reve_semantic_check = true;
 	}
 	else if (!strcmp(argv[i], "-unroll")){ 
 		if( ++i >= optc || sscanf(argv[i],"%d",&side0_unroll_threshold) < 1 || side0_unroll_threshold < 0) {

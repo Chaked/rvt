@@ -1,6 +1,7 @@
+void __CPROVER_assume(_Bool);
 int id(int n){
-	if(n <= 0) return 0;
-	if(n == 1) return 1;
+  	 __CPROVER_assume(n>0);
+	if(n <= 1) return 1;
 	return 1 + id(n - 1);
 }
 

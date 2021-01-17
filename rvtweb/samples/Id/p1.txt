@@ -1,0 +1,13 @@
+void __CPROVER_assume(_Bool);
+int id(int n){
+  //This assumption can be added by using abstract interpretation. RVT can prove this equivalence when this is not commented.
+   //__CPROVER_assume(n>0);
+	if(n <= 1) return 1;
+	return 1 + id(n - 1);
+}
+
+int main(int x, char*argv[]) {
+	if (x>0)
+		return id(x);
+	return 0;
+}
