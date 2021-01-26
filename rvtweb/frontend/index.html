@@ -1,7 +1,7 @@
 ﻿
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <title>RVT</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,34 +12,41 @@
     <link rel="icon" href="./assets/ico/favicon.png">
     <link href="css/bootstrap.css" rel="stylesheet">
     <style>
-      body {
-        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
-      }
-      .tooltip-inner {
-          white-space:pre;
-          max-width:none;
-      }
-      .alert-danger {
-          white-space:pre;
-          max-width:none;
-      }
-      .top-buffer { margin-top:20px; }
+        body {
+            padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+        }
 
-      .btn-block {margin-bottom: 5px;}
+        .tooltip-inner {
+            white-space: pre;
+            max-width: none;
+        }
 
-      .CodeMirror {
-        border: 1px solid #eee;
-      }
+        .alert-danger {
+            white-space: pre;
+            max-width: none;
+        }
 
-      .dropdown-menu {
-          height: auto;
-          max-height: 200px;
-          overflow-x: hidden;
-      }
+        .top-buffer {
+            margin-top: 20px;
+        }
+
+        .btn-block {
+            margin-bottom: 5px;
+        }
+
+        .CodeMirror {
+            border: 1px solid #eee;
+        }
+
+        .dropdown-menu {
+            height: auto;
+            max-height: 200px;
+            overflow-x: hidden;
+        }
     </style>
-    <link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <!--<link href="css/bootstrap-responsive.css" rel="stylesheet">-->
 
-  </head>
+</head>
 
   <body>
 
@@ -195,7 +202,7 @@
       <link rel="stylesheet" href="./lib/codemirror.css">
       <script src="./mode/javascript/javascript.js"></script>
       <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-      <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
       <script src="./socket.io-client/socket.io.js"></script>
       <script src="./viz.js"></script>
       <script>
@@ -292,11 +299,8 @@
           appendParams('-nooutline_funcs')
           });
 
-          var prod_server = 'http://maorv-vm.iem.technion.ac.il:3017';
-          var prod_linux_server = 'http://rvt.iem.technion.ac.il:3018/';
-          var local_server = 'http://localhost:3018';
-          var socket = io.connect(prod_linux_server);//,{secure: true});
-
+          var secure_server = 'https://rvt.iem.technion.ac.il';
+          var socket = io.connect(secure_server,{secure: true});
 
           socket.on('connect', function(){
           $('#stdout-frame').hide();
